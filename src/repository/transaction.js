@@ -3,7 +3,7 @@ const postgreDb = require("../config/postgres");
 const getTransaction = () => {
     return new Promise((resolve, reject) => {
       const query =
-            "select id, product_name, quantity, price, beverage_size, order_method, payment_method, time_order, ordered_by, total_payment from transactions";
+            "select id, product_name, quantity, price, beverage_size, order_method, payment_method, time_order, ordered_by, shipping, total_payment from transactions";
         postgreDb.query(query, (err, result) =>{
             if (err) {
                 console.log(err);
@@ -16,8 +16,8 @@ const getTransaction = () => {
 
 const postTransaction = (body) => {
     return new Promise((resolve, reject) => {
-      const query = `insert into transactions (product_name, quantity, price, beverage_size, order_method, payment_method, time_order, ordered_by, total_payment)
-      values ($1,$2,$3,$4,$5,$6,$7,$8,$9)`;
+      const query = `insert into transactions (product_name, quantity, price, beverage_size, order_method, payment_method, time_order, ordered_by, shipping, total_payment)
+      values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)`;
     const {
       product_name,
       quantity,
@@ -27,6 +27,7 @@ const postTransaction = (body) => {
       payment_method,
       time_order,
       ordered_by,
+      shipping,
       total_payment
     } = body;
     postgreDb.query(
@@ -40,6 +41,7 @@ const postTransaction = (body) => {
         payment_method,
         time_order,
         ordered_by,
+        shipping,
         total_payment
       ],
           (err, result) => {

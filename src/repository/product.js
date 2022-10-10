@@ -89,7 +89,7 @@ const filterProduct = (params) => {
 const searchProduct = (params) => {
   return new Promise((resolve, reject) => {
     const query = "select * from products where lower(product_name) like lower($1)"
-    const values = [`${params.product_name}`,]
+    const values = [`%${params.product_name}%`,]
     postgreDb.query(query, values, (err, result) => {
       if (err) {
         console.log(err);
