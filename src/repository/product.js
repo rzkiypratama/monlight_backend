@@ -3,7 +3,7 @@ const postgreDb = require("../config/postgres");
 const getProduct = () => {
     return new Promise((resolve, reject) => {
       const query =
-            "select id, product_name, price, stock, category, discount from products";
+            "select id, product_name, description, price, stock, category, discount from products";
         postgreDb.query(query, (err, result) =>{
             if (err) {
                 console.log(err);
@@ -16,12 +16,12 @@ const getProduct = () => {
 
 const postProduct = (body) => {
     return new Promise((resolve, reject) => {
-      const query = `insert into products (product_name, category, price, stock, discount)
+      const query = `insert into products (product_name, category, price, description, stock, discount)
       values ($1,$2,$3,$4,$5)`;
-      const { product_name, category, price, stock, discount } = req.body;
+      const { product_name, category, price, description, stock, discount } = req.body;
       postgreDb.query(
         query,
-        [product_name, category, price, stock, discount],
+        [product_name, category, price, description, stock, discount],
           (err, result) => {
             console.log(err);
             if (err) {
