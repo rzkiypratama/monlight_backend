@@ -2,7 +2,7 @@ const postgreDb = require("../config/postgres");
 
 const getUser = () => {
     return new Promise((resolve, reject) => {
-      const query = "select id, email, password, phone, display_name, first_name, last_name, gender, delivery_address, create_at from users";
+      const query = "select * from users";
         postgreDb.query(query, (err, result) =>{
             if (err) {
                 console.log(err);

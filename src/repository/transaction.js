@@ -3,7 +3,7 @@ const postgreDb = require("../config/postgres");
 const getTransaction = () => {
     return new Promise((resolve, reject) => {
       const query =
-            "select id, product_name, quantity, price, beverage_size, order_method, payment_method, time_order, ordered_by, shipping, tax, total_payment from transactions";
+            "select * from transactions";
         postgreDb.query(query, (err, result) =>{
             if (err) {
                 console.log(err);

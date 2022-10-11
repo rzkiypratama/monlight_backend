@@ -3,7 +3,7 @@ const postgreDb = require("../config/postgres");
 const getProduct = () => {
   return new Promise((resolve, reject) => {
     const query =
-      "select id, product_name, description, price, stock, category, discount from products";
+      "select * from products";
     postgreDb.query(query, (err, result) => {
       if (err) {
         console.log(err);
@@ -128,9 +128,16 @@ const filterProduct = (params) => {
   });
 };
 
-const sortsProduct = () => {
+const sortsProduct = (queryParams) => {
   return new Promise((resolve, reject) => {
-    const query = "select id, product_name, price from products order by price asc";
+    let query =
+      "select id, product_name, price from products";
+      if (queryParams.sorting == "asc") {
+        query += " order by price asc";
+      }
+      if (queryParams.sorting == "desc") {
+        query += " order by price desc";
+      }
     postgreDb.query(query, (err, result) => {
       if (err) {
         console.log(err);
@@ -140,6 +147,20 @@ const sortsProduct = () => {
     });
   });
 };
+
+// const sortsProduct = () => {
+//   return new Promise((resolve, reject) => {
+//     const query =
+//       "select id, product_name, price from products order by price asc";
+//     postgreDb.query(query, (err, result) => {
+//       if (err) {
+//         console.log(err);
+//         return reject(err);
+//       }
+//       return resolve(result);
+//     });
+//   });
+// };
 
 const usersRepo = {
   getProduct,

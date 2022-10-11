@@ -2,7 +2,7 @@ const postgreDb = require("../config/postgres");
 
 const getPromo = () => {
   return new Promise((resolve, reject) => {
-    const query = "select id, code_promo, detail_promo, valid from promos";
+    const query = "select * from promos";
     postgreDb.query(query, (err, result) => {
       if (err) {
         console.log(err);

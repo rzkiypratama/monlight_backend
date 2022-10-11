@@ -1,3 +1,4 @@
+const { query } = require("express");
 const productRepo = require("../repository/product");
 
 const productController = {
@@ -101,17 +102,18 @@ const productController = {
 
   sort: async (req, res) => {
     try {
-      const result = await productRepo.sortsProduct(req.body);
+      const response =
+        await productRepo.sortsProduct(req.query);
       res.status(200).json({
-        result: result.rows,
+        result: response.rows,
       });
     } catch (error) {
-      console.log(error)
       res.status(500).json({
-        msg: "Internal Server Error"
-      })
+        msg: "Internal Server Error",
+      });
     }
   },
+
 };
 
 module.exports = productController;
