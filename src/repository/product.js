@@ -16,7 +16,7 @@ const getProduct = () => {
 
 const postProduct = (body) => {
   return new Promise((resolve, reject) => {
-    const query = `insert into products (product_name, category, price, description, stock, discount)
+    const query = `insert into products (product_name, category, price, description, stock, discount, time_upload)
       values ($1,$2,$3,$4,$5,$6)`;
     const {
       product_name,
@@ -25,6 +25,7 @@ const postProduct = (body) => {
       description,
       stock,
       discount,
+      time_upload
     } = body;
     postgreDb.query(
       query,
@@ -35,6 +36,7 @@ const postProduct = (body) => {
         description,
         stock,
         discount,
+        time_upload
       ],
       (err, result) => {
         console.log(err);
@@ -131,12 +133,18 @@ const filterProduct = (params) => {
 const sortsProduct = (queryParams) => {
   return new Promise((resolve, reject) => {
     let query =
-      "select id, product_name, price from products";
-      if (queryParams.sorting == "asc") {
+      "select id, product_name, price, time_upload from products";
+      if (queryParams.price == "cheap") {
         query += " order by price asc";
       }
-      if (queryParams.sorting == "desc") {
+      if (queryParams.price == "exp") {
         query += " order by price desc";
+      }
+      if (queryParams.post == "old") {
+        query += " order by time_upload asc";
+      }
+      if (queryParams.post == "new") {
+        query += " order by time_upload desc";
       }
     postgreDb.query(query, (err, result) => {
       if (err) {

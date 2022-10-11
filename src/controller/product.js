@@ -100,6 +100,7 @@ const productController = {
     }
   },
 
+
   sort: async (req, res) => {
     try {
       const response =
