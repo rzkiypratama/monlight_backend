@@ -1,4 +1,6 @@
+require("dotenv").config();
 const express = require("express");
+const morgan = require("morgan")
 
 const postgreDb = require("./src/config/postgres");
 
@@ -19,6 +21,7 @@ postgreDb
     server.use(express.urlencoded({ extended: false }))
     // extend false supaya parsing make querystring
 
+    server.use(morgan(':method :url :status :res[content-length] - :response-time ms'))
     server.use(mainRouter);
 
     server.get("/", (req, res) => {
@@ -27,9 +30,6 @@ postgreDb
       });
     });
     
-
-
-
     //   ini server
     server.listen(PORT, () => {
       console.log(`Server is running at port ${PORT}`);

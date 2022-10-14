@@ -15,10 +15,10 @@ const getPromo = () => {
 
 const postPromo = (body) => {
   return new Promise((resolve, reject) => {
-    const query = `insert into promos (code_promo, detail_promo, value_promo, valid)
+    const query = `insert into promos (promo_id, promo_detail, promo_value, valid)
       values ($1,$2,$3,$4)`;
-    const { code_promo, detail_promo, value_promo, valid} = body;
-    postgreDb.query(query, [code_promo, detail_promo, value_promo, valid], (err, result) => {
+    const { promo_id, promo_detail, promo_value, valid} = body;
+    postgreDb.query(query, [promo_id, promo_detail, promo_value, valid], (err, result) => {
       console.log(err);
       if (err) {
         return reject(err);
@@ -68,7 +68,7 @@ const clearPromo = (params) => {
 
 const searchPromo = (queryParams) => {
   return new Promise((resolve, reject) => {
-    const query = "select * from promos where lower(code_promo) like lower($1) or lower(detail_promo) like lower($2)"
+    const query = "select * from promos where lower(promo_id) like lower($1) or lower(promo_detail) like lower($2)"
     const values = [`%${queryParams.code_promo}%`, `%${queryParams.detail_promo}%`]
     postgreDb.query(query, values, (err, result) => {
       if (err) {
