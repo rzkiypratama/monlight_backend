@@ -53,10 +53,7 @@ const productController = {
 
   clear: async (req, res) => {
     try {
-      const result =
-        await productRepo.clearProduct(
-          req.params,
-        );
+      const result = productRepo.clearProduct(req.params)
       res.status(200).json({
         message: "Delete Data Successfully!",
         result: result.rows,
@@ -66,7 +63,7 @@ const productController = {
         message: "Internal Server Error",
       });
     }
-  },
+    },
 
   search: async (req, res) => {
     try {

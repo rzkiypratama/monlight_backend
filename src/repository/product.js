@@ -17,7 +17,7 @@ const getProduct = () => {
 const postProduct = (body) => {
   return new Promise((resolve, reject) => {
     const query = `insert into products (product_name, category, price, description, stock, discount, time_upload)
-      values ($1,$2,$3,$4,$5,$6)`;
+      values ($1,$2,$3,$4,$5,$6,$7)`;
     const {
       product_name,
       category,
@@ -79,16 +79,13 @@ const editProduct = (body, params) => {
 const clearProduct = (params) => {
   return new Promise((resolve, reject) => {
     let id = params.id;
-    postgreDb.query(
-      `DELETE FROM products WHERE id = ${id}`,
-      (err) => {
-        //if(err) throw err
-        if (err) {
-          return reject(err);
-        }
-        resolve();
-      },
-    );
+    postgreDb.query(`DELETE FROM products WHERE id = ${id}`, (err) => {
+      //if(err) throw err
+      if (err) {
+        return reject(err);
+      }
+      resolve();
+    });
   });
 };
 
@@ -133,7 +130,7 @@ const filterProduct = (params) => {
 const sortsProduct = (queryParams) => {
   return new Promise((resolve, reject) => {
     let query =
-      "select id, product_name, price, time_upload from products";
+      "select id, product_name, price, time_upload, product_image from products";
       if (queryParams.price == "cheap") {
         query += " order by price asc";
       }

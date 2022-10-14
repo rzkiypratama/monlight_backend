@@ -1,4 +1,3 @@
-const { query } = require("express");
 const express = require("express");
 
 const postgreDb = require("./src/config/postgres");
@@ -7,7 +6,7 @@ const mainRouter = require("./src/routes/main");
 // init express application
 const server = express();
 
-const PORT = 8080;
+const PORT = 8081;
 
 // db konakin dulu baru jalanin server
 
