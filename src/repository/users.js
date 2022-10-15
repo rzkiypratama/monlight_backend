@@ -3,7 +3,7 @@ const bcrypt = require("bcrypt");
 
 const getUser = () => {
   return new Promise((resolve, reject) => {
-    const query = "select * from users";
+    const query = "select * from users_profile";
     postgreDb.query(query, (err, result) => {
       if (err) {
         console.log(err);
@@ -16,29 +16,15 @@ const getUser = () => {
 
 const postUser = (body) => {
   return new Promise((resolve, reject) => {
-    const query = `insert into users (email, password, phone, username first_name, last_name, delivery_address)
-        values ($1,$2,$3,$4,$5,$6,$7,$8)`;
+    const query = `insert into users_profile (username, name_profile, phone, delivery_address, photo_profile)
+        values ($1,$2,$3,$4,$5)`;
     const {
-      email,
-      password,
-      phone,
-      username,
-      first_name,
-      last_name,
-      delivery_address,
-      create_at,
+      username, name_profile, phone, delivery_address, photo_profile
     } = body;
     postgreDb.query(
       query,
       [
-        email,
-        password,
-        phone,
-        username,
-        first_name,
-        last_name,
-        delivery_address,
-        create_at,
+        username, name_profile, phone, delivery_address, photo_profile
       ],
       (err, result) => {
         console.log(err);
@@ -53,7 +39,7 @@ const postUser = (body) => {
 
 const editUser = (body, params) => {
   return new Promise((resolve, reject) => {
-    let query = "update users set ";
+    let query = "update users_profile set ";
     const values = [];
     Object.keys(body).forEach((key, idx, arr) => {
       if (idx === arr.length - 1) {
@@ -81,7 +67,7 @@ const clearUser = (params) => {
   return new Promise((resolve, reject) => {
     let id = params.id;
     postgreDb.query(
-      `DELETE FROM users WHERE id = ${id}`,
+      `DELETE FROM users_profile WHERE id = ${id}`,
       (err) => {
         //if(err) throw err
         if (err) {
@@ -100,9 +86,8 @@ const regUser = (body) => {
     /* cek apakah email ada di body db, kalo ada rejek status 400 bad req 
       kalau tidak, lanjut hash*/
     const query =
-      "insert into register_user (username, email, password, create_at) values($1, $2, $3, $4) returning id";
+      "insert into users (email, password, create_at) values($1, $2, $3) returning id";
     const {
-      username,
       email,
       password,
       create_at,
@@ -116,7 +101,6 @@ const regUser = (body) => {
         return reject(err);
       }
       const values = [
-        username,
         email,
         hashPwd,
         create_at,
@@ -139,7 +123,7 @@ const regUser = (body) => {
 const editPwd = (body) => {
 return new Promise ((resolve, reject) => {
 const { old_password, new_password, user_id} = body
-const getPwdQuery = "select password from register_user where id = $1";
+const getPwdQuery = "select password from users where id = $1";
 const getPwdValues = [user_id]
 postgreDb.query(getPwdQuery, getPwdValues, (err, response) => {
   if (err) {
@@ -158,7 +142,7 @@ bcrypt.hash(new_password, 10, (err, newHashedPassword) => {
     console.log(err)
     return reject({err})
   }
-  const editPwdQuery = "update register_user set password = $1 where id = $2"
+  const editPwdQuery = "update users set password = $1 where id = $2"
   const editPwdValues = [newHashedPassword, user_id];
   postgreDb.query(editPwdQuery, editPwdValues, (err, response) => {
     if (err) {

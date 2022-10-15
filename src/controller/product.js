@@ -1,4 +1,4 @@
-const { query } = require("express");
+// const { query } = require("express");
 const productRepo = require("../repository/product");
 
 const productController = {

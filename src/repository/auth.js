@@ -6,7 +6,7 @@ module.exports = {
   login: (body) => {
     return new Promise((resolve, reject) => {
       const {email, password} = body;
-      const getPasswordByEmailQuery = "select id, username, password from register_user where email = $1"
+      const getPasswordByEmailQuery = "select id, password from users where email = $1"
       const getPasswordByEmailValue = [email]
       postgreDb.query(getPasswordByEmailQuery, getPasswordByEmailValue, (err, response) => {
         if(err) {
