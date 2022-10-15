@@ -5,9 +5,9 @@ const productController = {
   get: async (req, res) => {
     try {
       const response =
-        await productRepo.getProduct();
+        await productRepo.getProduct(req.query);
       res.status(200).json({
-        result: response.rows,
+        result: response.rows
       });
     } catch (error) {
       res.status(500).json({
@@ -19,10 +19,9 @@ const productController = {
   post: async (req, res) => {
     try {
       const result =
-        await productRepo.postProduct(req.body);
+        await productRepo.postProduct(req.body, req.file);
       res.status(201).json({
         msg: "Create New Product Success!",
-        result: result.rows,
       });
     } catch (err) {
       res

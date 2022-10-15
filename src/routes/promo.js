@@ -2,6 +2,8 @@ const express = require("express");
 
 const promosRouter = express.Router();
 
+// const uploadRouter = require("../Middleware/upload")
+
 const {get, post, patch, clear, search} = require("../controller/promo")
 
 promosRouter.get("/get", get);
@@ -15,3 +17,4 @@ promosRouter.delete("/:id", clear);
 promosRouter.get("/", search);
 
 module.exports = promosRouter;
+

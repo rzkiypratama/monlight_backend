@@ -15,10 +15,10 @@ const getPromo = () => {
 
 const postPromo = (body) => {
   return new Promise((resolve, reject) => {
-    const query = `insert into promos (promo_id, promo_detail, promo_value, valid)
-      values ($1,$2,$3,$4)`;
-    const { promo_id, promo_detail, promo_value, valid} = body;
-    postgreDb.query(query, [promo_id, promo_detail, promo_value, valid], (err, result) => {
+    const query = `insert into promos (promo_id, promo_detail, promo_value, valid, promo_img)
+      values ($1,$2,$3,$4,$5)`;
+    const { promo_id, promo_detail, promo_value, valid, promo_img} = body;
+    postgreDb.query(query, [promo_id, promo_detail, promo_value, valid, promo_img], (err, result) => {
       console.log(err);
       if (err) {
         return reject(err);

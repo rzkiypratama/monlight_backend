@@ -1,10 +1,40 @@
 const postgreDb = require("../config/postgres");
 
-const getProduct = () => {
+// const getProduct = () => {
+//   return new Promise((resolve, reject) => {
+//     const query =
+//       "select * from products";
+//     postgreDb.query(query, (err, result) => {
+//       if (err) {
+//         console.log(err);
+//         return reject(err);
+//       }
+//       return resolve(result);
+//     });
+//   });
+// };
+
+const getProduct = (queryParams) => {
   return new Promise((resolve, reject) => {
-    const query =
-      "select * from products";
-    postgreDb.query(query, (err, result) => {
+    let query = "select id, product_name, category, price, stock, description, time_upload, product_img from products";
+    const values = [];
+    const whereParams = Object.keys(queryParams).filter((key) =>
+      ["product_name", "category", "price", "stock", "description"].includes(key)
+    );
+    if (whereParams.length > 0) query += "where ";
+    whereParams.forEach((key) => {
+      if (values.length > 0) query += "and ";
+      query += `lower(${key}) like lower('%' || $${
+        values.length + 1
+      } || '%') `;
+      values.push(String(queryParams[key]));
+    });
+    const page = Number(queryParams.page);
+    const limit = Number(queryParams.limit);
+    const offset = (page - 1) * limit;
+    query += `limit $${values.length + 1} offset $${values.length + 2}`;
+    values.push(limit, offset);
+    postgreDb.query(query, values, (err, result) => {
       if (err) {
         console.log(err);
         return reject(err);
@@ -14,10 +44,11 @@ const getProduct = () => {
   });
 };
 
-const postProduct = (body) => {
+const postProduct = (body, file) => {
   return new Promise((resolve, reject) => {
-    const query = `insert into products (product_name, category, price, description, stock, discount, time_upload)
-      values ($1,$2,$3,$4,$5,$6,$7)`;
+    // const timestamp = Date.now() / 1000;
+    const query = `insert into products (product_name, category, price, description, stock, discount)
+      values ($1,$2,$3,$4,$5,$6)`;
     const {
       product_name,
       category,
@@ -25,8 +56,8 @@ const postProduct = (body) => {
       description,
       stock,
       discount,
-      time_upload
     } = body;
+    const imageurl = `/image/${file.filename}`
     postgreDb.query(
       query,
       [
@@ -36,7 +67,6 @@ const postProduct = (body) => {
         description,
         stock,
         discount,
-        time_upload
       ],
       (err, result) => {
         console.log(err);
@@ -92,8 +122,8 @@ const clearProduct = (params) => {
 const searchProduct = (params) => {
   return new Promise((resolve, reject) => {
     const query =
-      "select * from products where lower(product_name) like lower($1)";
-    const values = [`%${params.product_name}%`];
+      "select * from products where lower(product_name) like lower($1) or lower(category) like lower($2)";
+    const values = [`%${params.product_name}%`, `%${params.category}%`];
     postgreDb.query(
       query,
       values,
@@ -111,7 +141,7 @@ const searchProduct = (params) => {
 const filterProduct = (params) => {
   return new Promise((resolve, reject) => {
     const query =
-      "select * from products where lower(category) like lower($1) order by id asc";
+      "select * from products where order by asc lower(category) like lower($1)";
     const values = [`${params.category}`];
     postgreDb.query(
       query,

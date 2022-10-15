@@ -1,7 +1,7 @@
 const postgreDb = require("../config/postgres")
 const authRouter = require("express").Router();
 const authController = require("../controller/auth")
-const isLogin = require("../Middleware/isLogin")
+const login = require("../Middleware/isLogin")
 
 
 authRouter.post("/", authController.login)

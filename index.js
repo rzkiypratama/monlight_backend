@@ -8,7 +8,7 @@ const mainRouter = require("./src/routes/main");
 // init express application
 const server = express();
 
-const PORT = 8081;
+const PORT = 8181;
 
 // db konakin dulu baru jalanin server
 
@@ -17,6 +17,7 @@ postgreDb
   .then(() => {
     console.log("DB connected");
 
+    server.use(express.static("./uploads"))
     server.use(express.json());
     server.use(express.urlencoded({ extended: false }))
     // extend false supaya parsing make querystring

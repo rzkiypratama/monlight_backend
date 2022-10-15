@@ -20,7 +20,7 @@ const promosController = {
     const result = await promosRepo.postPromo(req.body)
           res.status(201).json({
             msg: "Create New promo Success!",
-            result: result.rows,
+            result: result.rows.body,
           });
     } catch (err) {
       res.status(500).json({ msg: "Internal Server Error" });

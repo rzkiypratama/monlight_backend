@@ -2,6 +2,8 @@ const express = require("express");
 
 const usersRouter = express.Router();
 
+const isLogin = require("../Middleware/isLogin")
+
 const { get, post, patch, clear, reg, editPwd} = require("../controller/users")
 
 //register
@@ -11,9 +13,9 @@ usersRouter.patch("/account", editPwd);
 // // edit profile
 // usersRouter.patch("/edit", (req, res) => { })
 
-usersRouter.get("/", get);
+usersRouter.get("/", isLogin(),get);
 
-usersRouter.post("/", post);
+usersRouter.post("/", isLogin() ,post);
 
 usersRouter.patch("/:id", patch);
 
