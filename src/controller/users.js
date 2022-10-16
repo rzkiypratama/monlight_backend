@@ -17,10 +17,10 @@ const usersController = {
 
   post: async (req, res) => {
     try {
-    const result = await usersRepo.postUser(req.body)
+    const result = await usersRepo.postUser(req.body, req.file)
           res.status(201).json({
             msg: "Create New User Success!",
-            result: result.rows,
+            result: result.rows.body,
           });
     } catch (err) {
       res.status(500).json({ msg: "Internal Server Error" });

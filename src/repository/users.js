@@ -14,17 +14,18 @@ const getUser = () => {
   });
 };
 
-const postUser = (body) => {
+const postUser = (body, file) => {
   return new Promise((resolve, reject) => {
-    const query = `insert into users_profile (username, name_profile, phone, delivery_address, photo_profile)
-        values ($1,$2,$3,$4,$5)`;
+    const query = `insert into users_profile (username, name_profile, phone, delivery_address)
+        values ($1,$2,$3,$4)`;
     const {
-      username, name_profile, phone, delivery_address, photo_profile
+      username, name_profile, phone, delivery_address
     } = body;
+    const imageurl = `/image/${file.filename}`
     postgreDb.query(
       query,
       [
-        username, name_profile, phone, delivery_address, photo_profile
+        username, name_profile, phone, delivery_address
       ],
       (err, result) => {
         console.log(err);

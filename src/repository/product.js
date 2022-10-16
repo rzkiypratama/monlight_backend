@@ -16,19 +16,6 @@ const postgreDb = require("../config/postgres");
 
 const getProduct = (queryParams) => {
   return new Promise((resolve, reject) => {
-    // const bookSchema = {
-    //   table: "books",
-    //   alias: "b",
-    //   column: {
-    //     id: "number",
-    //     title: "string",
-    //     author: "string",
-    //     publisher: "string",
-    //     genre: "string",
-    //     published_date: "date",
-    //   },
-    // };
-    // asumsi query params selalu berisi title dan author
     let query = "select id, product_name, price, stock, description, category, time_upload from products";
     const values = [];
     const parameters = Object.keys(queryParams).filter((key) =>

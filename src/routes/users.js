@@ -4,6 +4,9 @@ const usersRouter = express.Router();
 
 const isLogin = require("../Middleware/isLogin")
 
+const upload = require("../Middleware/upload")
+
+
 const { get, post, patch, clear, reg, editPwd} = require("../controller/users")
 
 //register
@@ -15,7 +18,7 @@ usersRouter.patch("/account", editPwd);
 
 usersRouter.get("/", isLogin(),get);
 
-usersRouter.post("/", isLogin() ,post);
+usersRouter.post("/", isLogin(), upload.single("images"),post);
 
 usersRouter.patch("/:id", patch);
 
