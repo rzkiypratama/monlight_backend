@@ -16,13 +16,26 @@ const postgreDb = require("../config/postgres");
 
 const getProduct = (queryParams) => {
   return new Promise((resolve, reject) => {
-    let query = "select id, product_name, category, price, stock, description, time_upload, product_img from products";
+    // const bookSchema = {
+    //   table: "books",
+    //   alias: "b",
+    //   column: {
+    //     id: "number",
+    //     title: "string",
+    //     author: "string",
+    //     publisher: "string",
+    //     genre: "string",
+    //     published_date: "date",
+    //   },
+    // };
+    // asumsi query params selalu berisi title dan author
+    let query = "select id, product_name, price, stock, description, category, time_upload from products";
     const values = [];
-    const whereParams = Object.keys(queryParams).filter((key) =>
-      ["product_name", "category", "price", "stock", "description"].includes(key)
+    const parameters = Object.keys(queryParams).filter((key) =>
+      ["product_name", "price", "stock", "description", "category", "time_upload"].includes(key)
     );
-    if (whereParams.length > 0) query += "where ";
-    whereParams.forEach((key) => {
+    if (parameters.length > 0) query += " where ";
+    parameters.forEach((key) => {
       if (values.length > 0) query += "and ";
       query += `lower(${key}) like lower('%' || $${
         values.length + 1
@@ -32,8 +45,9 @@ const getProduct = (queryParams) => {
     const page = Number(queryParams.page);
     const limit = Number(queryParams.limit);
     const offset = (page - 1) * limit;
-    query += `limit $${values.length + 1} offset $${values.length + 2}`;
+    query += ` limit $${values.length + 1} offset $${values.length + 2}`;
     values.push(limit, offset);
+    console.log(query, values)
     postgreDb.query(query, values, (err, result) => {
       if (err) {
         console.log(err);
@@ -46,7 +60,6 @@ const getProduct = (queryParams) => {
 
 const postProduct = (body, file) => {
   return new Promise((resolve, reject) => {
-    // const timestamp = Date.now() / 1000;
     const query = `insert into products (product_name, category, price, description, stock, discount)
       values ($1,$2,$3,$4,$5,$6)`;
     const {
@@ -58,6 +71,9 @@ const postProduct = (body, file) => {
       discount,
     } = body;
     const imageurl = `/image/${file.filename}`
+    // let imageProduct = "/images/" + file.filename || null;
+    // if (file && file.fieldname == "image") {
+    //   query += image = '${imageProduct}';
     postgreDb.query(
       query,
       [

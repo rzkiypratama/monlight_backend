@@ -2,6 +2,7 @@
 const productRepo = require("../repository/product");
 
 const productController = {
+  
   get: async (req, res) => {
     try {
       const response =
