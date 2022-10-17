@@ -31,6 +31,7 @@ const getProduct = (queryParams) => {
     });
     const page = Number(queryParams.page);
     const limit = Number(queryParams.limit);
+
     const offset = (page - 1) * limit;
     query += ` limit $${values.length + 1} offset $${values.length + 2}`;
     values.push(limit, offset);
@@ -47,8 +48,13 @@ const getProduct = (queryParams) => {
 
 const postProduct = (body, file) => {
   return new Promise((resolve, reject) => {
-    const query = `insert into products (product_name, category, price, description, stock, discount)
-      values ($1,$2,$3,$4,$5,$6)`;
+    let imageUrl = null;
+    console.log(file)
+    const query = `insert into products (product_name, category, price, description, stock, discount, images)
+    values ($1,$2,$3,$4,$5,$6,$7)`;
+    if (file) {
+    imageUrl = "/images/" + file.filename;
+    }
     const {
       product_name,
       category,
@@ -56,11 +62,9 @@ const postProduct = (body, file) => {
       description,
       stock,
       discount,
+      imagesUrl
     } = body;
-    const imageurl = `/image/${file.filename}`
-    // let imageProduct = "/images/" + file.filename || null;
-    // if (file && file.fieldname == "image") {
-    //   query += image = '${imageProduct}';
+    console.log(body)
     postgreDb.query(
       query,
       [
@@ -70,6 +74,7 @@ const postProduct = (body, file) => {
         description,
         stock,
         discount,
+        imagesUrl
       ],
       (err, result) => {
         console.log(err);

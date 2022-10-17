@@ -1,6 +1,20 @@
 const postgreDb = require("../config/postgres");
 const bcrypt = require("bcrypt");
 
+
+const allRegUser = () => {
+  return new Promise((resolve, reject) => {
+    const query = "select * from users";
+    postgreDb.query(query, (err, result) => {
+      if (err) {
+        console.log(err);
+        return reject(err);
+      }
+      return resolve(result);
+    });
+  });
+};
+
 const getUser = () => {
   return new Promise((resolve, reject) => {
     const query = "select * from users_profile";
@@ -16,16 +30,19 @@ const getUser = () => {
 
 const postUser = (body, file) => {
   return new Promise((resolve, reject) => {
-    const query = `insert into users_profile (username, name_profile, phone, delivery_address)
+    const query = `insert into users_profile (username, display_name, phone, address)
         values ($1,$2,$3,$4)`;
     const {
-      username, name_profile, phone, delivery_address
+      username, display_name, phone, address
     } = body;
-    const imageurl = `/image/${file.filename}`
+    let image = null;
+    if (file) {
+      image = "/images/" + file.filename;
+    }
     postgreDb.query(
       query,
       [
-        username, name_profile, phone, delivery_address
+        username, display_name, phone, address
       ],
       (err, result) => {
         console.log(err);
@@ -82,19 +99,22 @@ const clearUser = (params) => {
 
 const regUser = (body) => {
   return new Promise((resolve, reject) => {
+    
     // if (typeof password kurang dari 6) maka return "password harus memuat 1 huruf besar dan 1 simbol (!@#$%^&*)"
     // email tidak boleh duplikat
     /* cek apakah email ada di body db, kalo ada rejek status 400 bad req 
       kalau tidak, lanjut hash*/
     const query =
-      "insert into users (email, password, create_at) values($1, $2, $3) returning id";
+      "insert into users (email, password) values($1, $2) returning id";
     const {
       email,
       password,
-      create_at,
     } = body;
     // validasi
-    
+    const isSame = "select email from users = $1"
+    if(isSame == body.email) {
+      return "eror nih email sama"
+    }
     // hash pwd
     bcrypt.hash(password, 10, (err, hashPwd) => {
       if (err) {
@@ -104,7 +124,6 @@ const regUser = (body) => {
       const values = [
         email,
         hashPwd,
-        create_at,
       ];
       postgreDb.query(
         query,
@@ -115,12 +134,72 @@ const regUser = (body) => {
             return reject(err);
           }
           return resolve(result);
-        },
-      );
-    });
-  });
-};
+          },
+    );
+        })    });
+  };
 
+// const regUser = (body) => {
+//   return new Promise((resolve, reject) => {
+//     const query = {
+//       checkEmail:
+//         "select email from users email = $1",
+//       userInsert:
+//         "insert into users (email, password) values($1, $2) returning id"
+//     };
+//     const { checkEmail, userInsert } = query;
+//     const { email, password} = body;
+
+//     postgreDb.query(checkEmail, [email], (error, checkResult) => {
+//       if (error) {
+//         console.log(error);
+//         return reject({ error });
+//       }
+//       //return resolve(checkResult.rows);
+//       if (checkResult.rows.length > 0) {
+//         const errorMessage = [];
+//         if (
+//           checkResult.rows.length > 1 ||
+//           (
+//             checkResult.rows[0].email == email)
+//         )
+//           errorMessage.push("Email already exist", 403);
+
+//         if (checkResult.rows[0].email == email)
+//           errorMessage.push("Email already exist", 403);
+
+//         return reject({
+//           error: new Error(errorMessage[0]),
+//           statusCode: errorMessage[1],
+//         });
+//       }
+//       bcrypt.hash(password, 10, (err, hashPwd) => {
+//               if (err) {
+//                 console.log(err);
+//                 return reject(err);
+//               }
+//               const values = [
+//                 email,
+//                 hashPwd,
+//               ];
+//               postgreDb.query(
+//                 query,
+//                 values,
+//                 (err, result) => {
+//                   if (err) {
+//                     console.log(err);
+//                     return reject(err);
+//                   }
+//                   return resolve(result);
+//                   },
+//             );
+//                 })    });
+//           })}
+        
+
+
+
+      
 const editPwd = (body) => {
 return new Promise ((resolve, reject) => {
 const { old_password, new_password, user_id} = body
@@ -166,6 +245,7 @@ const usersRepo = {
   clearUser,
   regUser,
   editPwd,
+  allRegUser
 };
 
 module.exports = usersRepo;

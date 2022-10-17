@@ -7,7 +7,7 @@ const isLogin = require("../Middleware/isLogin")
 const upload = require("../Middleware/upload")
 
 
-const { get, post, patch, clear, reg, editPwd} = require("../controller/users")
+const { get, post, patch, clear, reg, editPwd, allGetUser} = require("../controller/users")
 
 //register
 usersRouter.post("/register", reg);
@@ -17,6 +17,8 @@ usersRouter.patch("/account", editPwd);
 // usersRouter.patch("/edit", (req, res) => { })
 
 usersRouter.get("/", isLogin(),get);
+
+usersRouter.get("/regdata", isLogin(),allGetUser);
 
 usersRouter.post("/", isLogin(), upload.single("images"),post);
 
