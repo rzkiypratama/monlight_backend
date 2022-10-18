@@ -21,7 +21,7 @@ module.exports = {
             console.log(err)
             return reject(err)
           }
-          if (!isSame) return reject({err: new Error("Email/Password slaaah cok"), statusCode: 401})
+          if (!isSame) return reject({err: new Error("Email/Password is wrong"), statusCode: 401})
         })
         // asumsi sudah login
         const payload = {

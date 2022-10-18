@@ -57,7 +57,7 @@ const postUser = (body, file) => {
 
 const editUser = (body, params) => {
   return new Promise((resolve, reject) => {
-    let query = "update users_profile set ";
+    let query = "update profile set ";
     const values = [];
     Object.keys(body).forEach((key, idx, arr) => {
       if (idx === arr.length - 1) {
