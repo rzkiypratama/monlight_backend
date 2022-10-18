@@ -17,7 +17,7 @@ const allRegUser = () => {
 
 const getUser = () => {
   return new Promise((resolve, reject) => {
-    const query = "select * from users_profile";
+    const query = "select * from profile";
     postgreDb.query(query, (err, result) => {
       if (err) {
         console.log(err);

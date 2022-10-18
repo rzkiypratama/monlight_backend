@@ -119,12 +119,12 @@ const getProduct = (queryParams) => {
   return new Promise((resolve, reject) => {
     const { search, categories, sort, limit, page } = queryParams;
     let query =
-      "select p.product_name, p.price, p.image, c.category_name, p.description from products p join categories c on c.id = p.category_id left join transactions t on t.product_id = p.id ";
+      "select p.product_name, p.price, p.image, c.category_name, p.description from products p full outer join categories c on c.id = p.category_id left join transactions t on t.product_id = p.id ";
     let countQuery =
-      "select count(*) as count from products p join categories c on c.id = p.category_id left join transactions t on t.product_id = p.id ";
+      "select count(*) as count from products p full outer join categories c on c.id = p.category_id left join transactions t on t.product_id = p.id ";
 
     let checkWhere = true;
-    let link = "http://localhost:8181/api/monlight-project/products/get";
+    let link = "http://localhost:8181/api/monlight-project/products/get?";
 
     if (search) {
       link += `search${search}&`;
