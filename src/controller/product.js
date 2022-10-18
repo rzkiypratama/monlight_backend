@@ -3,15 +3,13 @@ const productRepo = require("../repository/product");
 
 const productController = {
   
-  get: async (req, res) => {
+  get : async (req, res) => {
     try {
-      const response =
-        await productRepo.getProduct(req.query);
-      res.status(200).json({
-        result: response.rows
-      });
+      const response = await productRepo.getProduct(req.query);
+      return res.status(200).json({ result: response });
     } catch (error) {
-      res.status(500).json({
+      console.log(error);
+      return res.status(500).json({
         msg: "Internal Server Error",
       });
     }
@@ -37,12 +35,13 @@ const productController = {
         await productRepo.editProduct(
           req.body,
           req.params,
+          req.file,
         );
       res
         .status(200)
         .json({
           msg: "Update Success!",
-          result: result,
+          
         });
     } catch (err) {
       res

@@ -30,19 +30,19 @@ const getUser = () => {
 
 const postUser = (body, file) => {
   return new Promise((resolve, reject) => {
-    const query = `insert into users_profile (username, display_name, phone, address)
-        values ($1,$2,$3,$4)`;
+    const query = `insert into profile (username, display_name, gender, birthday, phone, address, image)
+        values ($1,$2,$3,$4,$5,$6,$7)`;
     const {
-      username, display_name, phone, address
+      username, display_name, gender, birthday, phone, address
     } = body;
-    let image = null;
+    let imageUrl = null;
     if (file) {
-      image = "/images/" + file.filename;
+      imageUrl = "/images/" + file.filename;
     }
     postgreDb.query(
       query,
       [
-        username, display_name, phone, address
+        username, display_name, gender, birthday, phone, address, imageUrl
       ],
       (err, result) => {
         console.log(err);
@@ -97,107 +97,117 @@ const clearUser = (params) => {
   });
 };
 
-const regUser = (body) => {
-  return new Promise((resolve, reject) => {
-    
-    // if (typeof password kurang dari 6) maka return "password harus memuat 1 huruf besar dan 1 simbol (!@#$%^&*)"
-    // email tidak boleh duplikat
-    /* cek apakah email ada di body db, kalo ada rejek status 400 bad req 
-      kalau tidak, lanjut hash*/
-    const query =
-      "insert into users (email, password) values($1, $2) returning id";
-    const {
-      email,
-      password,
-    } = body;
-    // validasi
-    const isSame = "select email from users = $1"
-    if(isSame == body.email) {
-      return "eror nih email sama"
-    }
-    // hash pwd
-    bcrypt.hash(password, 10, (err, hashPwd) => {
-      if (err) {
-        console.log(err);
-        return reject(err);
-      }
-      const values = [
-        email,
-        hashPwd,
-      ];
-      postgreDb.query(
-        query,
-        values,
-        (err, result) => {
-          if (err) {
-            console.log(err);
-            return reject(err);
-          }
-          return resolve(result);
-          },
-    );
-        })    });
-  };
-
 // const regUser = (body) => {
 //   return new Promise((resolve, reject) => {
-//     const query = {
-//       checkEmail:
-//         "select email from users email = $1",
-//       userInsert:
-//         "insert into users (email, password) values($1, $2) returning id"
-//     };
-//     const { checkEmail, userInsert } = query;
-//     const { email, password} = body;
-
-//     postgreDb.query(checkEmail, [email], (error, checkResult) => {
-//       if (error) {
-//         console.log(error);
-//         return reject({ error });
+    
+//     // if (typeof password kurang dari 6) maka return "password harus memuat 1 huruf besar dan 1 simbol (!@#$%^&*)"
+//     // email tidak boleh duplikat
+//     /* cek apakah email ada di body db, kalo ada rejek status 400 bad req 
+//       kalau tidak, lanjut hash*/
+//     const query =
+//       "insert into users (email, password) values($1, $2) returning id";
+//     const {
+//       email,
+//       password,
+//     } = body;
+//     // validasi
+//     // hash pwd
+//     bcrypt.hash(password, 10, (err, hashPwd) => {
+//       if (err) {
+//         console.log(err);
+//         return reject(err);
 //       }
-//       //return resolve(checkResult.rows);
-//       if (checkResult.rows.length > 0) {
-//         const errorMessage = [];
-//         if (
-//           checkResult.rows.length > 1 ||
-//           (
-//             checkResult.rows[0].email == email)
-//         )
-//           errorMessage.push("Email already exist", 403);
-
-//         if (checkResult.rows[0].email == email)
-//           errorMessage.push("Email already exist", 403);
-
-//         return reject({
-//           error: new Error(errorMessage[0]),
-//           statusCode: errorMessage[1],
-//         });
-//       }
-//       bcrypt.hash(password, 10, (err, hashPwd) => {
-//               if (err) {
-//                 console.log(err);
-//                 return reject(err);
-//               }
-//               const values = [
-//                 email,
-//                 hashPwd,
-//               ];
-//               postgreDb.query(
-//                 query,
-//                 values,
-//                 (err, result) => {
-//                   if (err) {
-//                     console.log(err);
-//                     return reject(err);
-//                   }
-//                   return resolve(result);
-//                   },
-//             );
-//                 })    });
-//           })}
+//       const values = [
+//         email,
+//         hashPwd,
+//       ];
+//       postgreDb.query(
+//         query,
+//         values,
+//         (err, result) => {
+//           if (err) {
+//             console.log(err);
+//             return reject(err);
+//           }
+//           return resolve(result);
+//           },
+//     );
+//         })    });
+//   };
         
 
+const regUser = (body) => {
+  return new Promise((resolve, reject) => {
+    const queries = {
+      checkEmailandPhone:
+        "select p.phone, u.email from profile p left join users u on u.id = p.user_id where phone = $1 or email = $2",
+      userInsert:
+        "insert into users(email, password, created_at, update_at, role_id) values($1, $2, to_timestamp($3), to_timestamp($4), $5) returning id",
+      profileInsert:
+        "insert into profile(user_id, phone, created_at, update_at) values($1, $2, to_timestamp($3), to_timestamp($4))",
+    };
+    const { checkEmailandPhone, userInsert, profileInsert } = queries;
+    const timeStamp = Date.now() / 1000;
+    const { email, password, phone } = body;
 
+    postgreDb.query(
+      checkEmailandPhone,
+      [phone, email],
+      (error, checkResult) => {
+        if (error) {
+          console.log(error);
+          return reject({ error });
+        }
+        if (checkResult.rows.length > 0) {
+          const errorMessage = [];
+          if (
+            checkResult.rows.length > 1 ||
+            (checkResult.rows[0].phone == phone &&
+              checkResult.rows[0].email == email)
+          )
+            errorMessage.push("Email and phone number already exist", 403);
+
+          if (checkResult.rows[0].phone == phone)
+            errorMessage.push("Email and phone number already exist", 403);
+          if (checkResult.rows[0].email == email)
+            errorMessage.push("Email and phone number already exist", 403);
+          return reject({
+            error: new Error(errorMessage[0]),
+            statusCode: errorMessage[1],
+          });
+        }
+        bcrypt.hash(password, 10, (error, hashedPwd) => {
+          if (error) {
+            console.log(error);
+            return reject({ error });
+          }
+          const role = 1;
+          postgreDb.query(
+            userInsert,
+            [email, hashedPwd, timeStamp, timeStamp, role],
+            (error, result) => {
+              if (error) {
+                console.log(error);
+                return reject({ error });
+              }
+              postgreDb.query(
+                profileInsert,
+                [result.rows[0].id, phone, timeStamp, timeStamp],
+                (error, result) => {
+                  if (error) {
+                    console.log(error);
+                    return reject({ error });
+                  }
+                  return resolve(result);
+                }
+              );
+            }
+          );
+        });
+      }
+    );
+  });
+};
 
       
 const editPwd = (body) => {

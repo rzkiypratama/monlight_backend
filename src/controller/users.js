@@ -74,9 +74,8 @@ const usersController = {
             username: req.body.username,
           }
         })
-      } catch (err) {
-        res.status(500).json({message: "Internal Server Error", error: err.message
-      })
+      } catch (errObj) {
+        res.status(errObj.statusCode || 500).json(errObj.error.message)
       }
     },
 

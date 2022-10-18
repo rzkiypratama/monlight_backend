@@ -46,6 +46,15 @@ const authController = {
     res.status(statusCode).json({msg: objErr.err.message});
       }
     },
+
+    logout: async (req, res) => {
+      try {
+        const response = await authRepo.logout(req.token);
+        return res.status(200).json({ response });
+      } catch (error) {
+        return res.status(500).json({ msg: "internal Server Error" });
+      }
+    },
   
 }
 

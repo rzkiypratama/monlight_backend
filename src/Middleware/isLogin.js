@@ -1,18 +1,29 @@
-const jwt = require("jsonwebtoken")
 
-module.exports = () => {
+const jwt = require("jsonwebtoken");
+const postgreDb = require("../config/postgres");
+const isLogin = () => {
   return (req, res, next) => {
     const token = req.header("access-token");
-    if (!token) return res.status(401).json({message: "Ninu ninu ninu login dulu mas"})
-    // untuk keperluan verifikasi
-    jwt.verify(token, process.env.secret_key,{issuer: process.env.issuer}, (err, decoded) => {
-      if(err){
-        console.log(err)
-        return res.status(403).json({msg: err.message})
+    if (!token) return res.status(401).json({ msg: "You have to login first" });
+
+    const query = "select token from blacklist where token = $1";
+    postgreDb.query(query, [token], (error, result) => {
+      if (error) {
+        console.log(error);
+        return res.status(500).json({ msg: "Internal Server Error" });
       }
-      // payload untuk cek role // payload tempel ke objek req
-req.userPayload = decoded;
-next();
+      if (result.rows.length !== 0)
+        return res.status(403).json({ msg: "You have to login" });
+    });
+    jwt.verify(token, process.env.secret_key, (error, decodedPayload) => {
+      if (error) {
+        console.log(error);
+        res.status(500).json({ error: error.name });
+      }
+      req.userPayload = decodedPayload;
+      req.token = token;
+      next();
     });
   };
-}
+};
+module.exports = isLogin;

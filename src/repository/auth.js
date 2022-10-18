@@ -42,4 +42,17 @@ module.exports = {
       )
     })
   },
+
+  logout: (token) => {
+    return new Promise((resolve, reject) => {
+      const query = "insert into blacklist(token) values($1)";
+      postgreDb.query(query, [token], (error, result) => {
+        if (error) {
+          console.log(error);
+          return reject(error);
+        }
+        return resolve({ message: "Logout Success." });
+      });
+    });
+  },
 };
