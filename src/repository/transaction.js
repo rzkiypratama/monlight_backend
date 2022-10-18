@@ -16,35 +16,15 @@ const getTransaction = () => {
 
 const postTransaction = (body) => {
     return new Promise((resolve, reject) => {
-      const query = `insert into transactions (product_name, quantity, price, beverage_size, order_method, payment_method, time_order, ordered_by, shipping, tax, total_payment)
-      values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)`;
+      const query = `insert into transactions (user_id, tax, payment_id, delivery_id, promo_id, product_id, qty, size_id, subtotal, status_id)
+      values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)`;
     const {
-      product_name,
-      quantity,
-      price,
-      beverage_size,
-      order_method,
-      payment_method,
-      time_order,
-      ordered_by,
-      shipping,
-      tax,
-      total_payment
+      user_id, tax, payment_id, delivery_id, promo_id, product_id, qty, size_id, subtotal, status_id,
     } = body;
     postgreDb.query(
       query,
       [
-        product_name,
-        quantity,
-        price,
-        beverage_size,
-        order_method,
-        payment_method,
-        time_order,
-        ordered_by,
-        shipping,
-        tax,
-        total_payment,
+        user_id, tax, payment_id, delivery_id, promo_id, product_id, qty, size_id, subtotal, status_id,
       ],
           (err, result) => {
             console.log(err);
