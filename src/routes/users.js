@@ -22,7 +22,7 @@ usersRouter.get("/regdata", isLogin(),allGetUser);
 
 usersRouter.post("/", isLogin(), upload.single("images"),post);
 
-usersRouter.patch("/:id", patch);
+usersRouter.patch("/:id", upload.single("images"), patch);
 
 usersRouter.delete("/:id", clear);
 

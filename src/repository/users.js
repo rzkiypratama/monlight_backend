@@ -55,14 +55,25 @@ const postUser = (body, file) => {
   });
 };
 
-const editUser = (body, params) => {
+const editUser = (body, params, file) => {
   return new Promise((resolve, reject) => {
     let query = "update profile set ";
     const values = [];
+    if (file) {
+      if (Object.keys(body).length === 0) {
+        const imageUrl = `/image/${file.filename}`;
+        query += `image = '${imageUrl}' where user_id = $1 returning username`;
+        values.push(params.id)
+      }
+      if (Object.keys(body).length > 0) {
+        const imageUrl = `/image/${file.filename}`;
+        query += `image = '${imageUrl}',`;
+    }
+    }
     Object.keys(body).forEach((key, idx, arr) => {
       if (idx === arr.length - 1) {
         query += `${key} = $${idx + 1
-          } where id = $${idx + 2}`;
+          } where user_id = $${idx + 2}`;
         values.push(body[key], params.id);
         return;
       }
@@ -97,44 +108,6 @@ const clearUser = (params) => {
   });
 };
 
-// const regUser = (body) => {
-//   return new Promise((resolve, reject) => {
-    
-//     // if (typeof password kurang dari 6) maka return "password harus memuat 1 huruf besar dan 1 simbol (!@#$%^&*)"
-//     // email tidak boleh duplikat
-//     /* cek apakah email ada di body db, kalo ada rejek status 400 bad req 
-//       kalau tidak, lanjut hash*/
-//     const query =
-//       "insert into users (email, password) values($1, $2) returning id";
-//     const {
-//       email,
-//       password,
-//     } = body;
-//     // validasi
-//     // hash pwd
-//     bcrypt.hash(password, 10, (err, hashPwd) => {
-//       if (err) {
-//         console.log(err);
-//         return reject(err);
-//       }
-//       const values = [
-//         email,
-//         hashPwd,
-//       ];
-//       postgreDb.query(
-//         query,
-//         values,
-//         (err, result) => {
-//           if (err) {
-//             console.log(err);
-//             return reject(err);
-//           }
-//           return resolve(result);
-//           },
-//     );
-//         })    });
-//   };
-        
 
 const regUser = (body) => {
   return new Promise((resolve, reject) => {
@@ -165,12 +138,12 @@ const regUser = (body) => {
             (checkResult.rows[0].phone == phone &&
               checkResult.rows[0].email == email)
           )
-            errorMessage.push("Email and phone number already exist", 403);
+            errorMessage.push("Email & phone number has been registered", 403);
 
           if (checkResult.rows[0].phone == phone)
-            errorMessage.push("Email and phone number already exist", 403);
+            errorMessage.push("Email & phone number has been registered", 403);
           if (checkResult.rows[0].email == email)
-            errorMessage.push("Email and phone number already exist", 403);
+            errorMessage.push("Email & phone number has been registered", 403);
           return reject({
             error: new Error(errorMessage[0]),
             statusCode: errorMessage[1],

@@ -13,7 +13,7 @@ module.exports = {
           console.log(err)
           return reject(err)
         }
-        if(response.rows.length === 0) return reject({err: new Error("Email/Password is Wrong"), statusCode: 401})
+        if(response.rows.length === 0) return reject({err: ("Email/Password is Wrong"), statusCode: 401})
         // pw di db === pw diinput?
         const hashedPassword= response.rows[0].password
         bcrypt.compare(password, hashedPassword, (err, isSame) => {

@@ -40,9 +40,12 @@ const usersController = {
     }
   },
 
-  patch: async (req, res) => {
+  patch: async (req, res, file) => {
     try {
-      usersRepo.editUser(req.body, req.params, req.file)
+      usersRepo.editUser(
+        req.body,
+         req.params, 
+         req.file)
       res.status(200).json({ msg: "Update Success!"})
     } catch (err) {
       res.status(500).json({ msg: "Internal Server Error" });

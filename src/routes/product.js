@@ -18,7 +18,7 @@ productsRouter.get("/", search);
 
 productsRouter.post("/", upload.single("images"), post);
 
-productsRouter.patch("/:id", patch);
+productsRouter.patch("/:id",upload.single("images"), patch); // belum dikasih middleware kayak yg atas
 
 productsRouter.delete("/:id", clear);
 
