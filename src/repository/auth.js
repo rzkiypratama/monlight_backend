@@ -6,7 +6,7 @@ module.exports = {
   login: (body) => {
     return new Promise((resolve, reject) => {
       const {email, password} = body;
-      const getPasswordByEmailQuery = "select id, password from users where email = $1"
+      const getPasswordByEmailQuery = "select u.id, u.email, u.password, r.role from users u left join role r on u.role_id = r.id where email = $1"
       const getPasswordByEmailValue = [email]
       postgreDb.query(getPasswordByEmailQuery, getPasswordByEmailValue, (err, response) => {
         if(err) {
@@ -28,6 +28,7 @@ module.exports = {
           username: response.rows[0].body,
           email: response.rows[0].email,
           user_id: response.rows[0].id,
+          role: response.rows[0].role,
         }
         jwt.sign(payload, process.env.secret_key, {expiresIn: "10m", 
         issuer: process.env.issuer}, 
@@ -36,7 +37,7 @@ module.exports = {
   console.log(err);
   return reject({err})
  }
- return resolve({token, name: payload.username})
+ return resolve({token, payload})
         })
         }
       )

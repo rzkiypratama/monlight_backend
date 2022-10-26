@@ -2,9 +2,9 @@ const express = require("express");
 
 const usersRouter = express.Router();
 
-const isLogin = require("../Middleware/isLogin")
+const isLogin = require("../middleware/isLogin")
 
-const upload = require("../Middleware/upload")
+const upload = require("../middleware/upload")
 
 
 const { get, post, patch, clear, reg, editPwd, allGetUser} = require("../controller/users")
@@ -20,9 +20,9 @@ usersRouter.get("/", isLogin(),get);
 
 usersRouter.get("/regdata", isLogin(),allGetUser);
 
-usersRouter.post("/", isLogin(), upload.single("images"),post);
+usersRouter.post("/", isLogin(), upload, post);
 
-usersRouter.patch("/:id", upload.single("images"), patch);
+usersRouter.patch("/:id", upload, patch);
 
 usersRouter.delete("/:id", clear);
 

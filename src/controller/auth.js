@@ -7,7 +7,7 @@ const authController = {
     authRepo.login(req.body)
     .then((response) => {
       res.status(200).json({
-        data: response,
+        data: {token: response.token, payload: response.payload},
         msg: "Welcome",
       })
     })

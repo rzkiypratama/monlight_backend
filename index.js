@@ -17,7 +17,7 @@ postgreDb
   .then(() => {
     console.log("DB connected");
 
-    server.use(express.static("./uploads"))
+    server.use(express.static("./uploads/images"))
     server.use(express.json());
     server.use(express.urlencoded({ extended: false }))
     // extend false supaya parsing make querystring
