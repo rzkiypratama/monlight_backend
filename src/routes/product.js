@@ -7,13 +7,13 @@ const login = require("../middleware/isLogin")
 
 productsRouter.get("/sort", sort); /*ini routing sort*/
 
-productsRouter.get("/get", login(), allowedRoles("Admin"), get);
+productsRouter.get("/get", login(), allowedRoles("User"), get);
 
 productsRouter.get("/:category", filter)
 
 productsRouter.get("/", search);
 
-productsRouter.post("/", upload, post);
+productsRouter.post("/", login(), allowedRoles("Admin"), upload, post);
 
 productsRouter.patch("/:id",upload, patch); // belum dikasih middleware kayak yg atas
 
