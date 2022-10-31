@@ -1,23 +1,19 @@
 require("dotenv").config();
 const express = require("express");
 const morgan = require("morgan")
-
 const postgreDb = require("./src/config/postgres");
-
 const mainRouter = require("./src/routes/main");
+const cors = require('cors')
 // init express application
 const server = express();
-
 const PORT = 8181;
-
 // db konakin dulu baru jalanin server
-
 postgreDb
   .connect()
   .then(() => {
     console.log("DB connected");
-
-    server.use(express.static("./uploads/images"))
+    server.use(cors())
+    server.use(express.static("./uploads/images/"))
     server.use(express.json());
     server.use(express.urlencoded({ extended: false }))
     // extend false supaya parsing make querystring

@@ -7,7 +7,7 @@ const login = require("../middleware/isLogin")
 
 productsRouter.get("/sort", sort); /*ini routing sort*/
 
-productsRouter.get("/get", login(), allowedRoles("User"), get);
+productsRouter.get("/get", get);
 
 productsRouter.get("/:category", filter)
 

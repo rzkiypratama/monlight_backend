@@ -50,5 +50,9 @@ const multerHandler = (req, res, next) => {
     next();
   });
 };
+// const memorystorage = multer.memoryStorage();
+
+// const memoryUpload
+
 
 module.exports = multerHandler;

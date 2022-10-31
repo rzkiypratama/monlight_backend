@@ -49,13 +49,13 @@ const getProduct = (queryParams) => {
         query += "order by p.created_at desc ";
         link += "sort=newest&";
       }
-      if (sort.toLowerCase() === "cheapest") {
+      if (sort.toLowerCase() === "low") {
         query += "order by p.price asc ";
-        link += "sort=cheapest&";
+        link += "sort=low&";
       }
-      if (sort.toLowerCase() === "priciest") {
+      if (sort.toLowerCase() === "high") {
         query += "order by p.price desc ";
-        link += "sort=priciest&";
+        link += "sort=high&";
       }
     }
     query += "limit $1 offset $2";
@@ -121,7 +121,7 @@ const postProduct = (body, file) => {
     const { product_name, price, category_id, description } = body;
     let imageUrl = null;
     if (file) {
-      imageUrl = "/images/" + file.filename;
+      imageUrl = file.filename;
     }
     // const imageUrl = `/images/${file.filename}`;
     postgreDb.query(
@@ -175,17 +175,17 @@ const postProduct = (body, file) => {
 const editProduct = (body, params, file) => {
   return new Promise((resolve, reject) => {
     let query = "update products set ";
+    let imageUrl = null;
     const values = [];
     if (file) {
+      imageUrl = `${file.filename}`;
       if (Object.keys(body).length === 0) {
-        const imageUrl = `/image/${file.filename}`;
-        query += `image = '${imageUrl}' where id = $1 returning product_name`;
-        values.push(params.id)
+        query += `image = '${imageUrl}', updated_at = to_timestamp($1) where id = $2 returning product_name`;
+        input.push(timestamp, id);
       }
       if (Object.keys(body).length > 0) {
-        const imageUrl = `/image/${file.filename}`;
-        query += `image = '${imageUrl}',`;
-    }
+        query += `image = '${imageUrl}', `;
+      }
     }
     Object.keys(body).forEach((key, idx, arr) => {
             if (idx === arr.length - 1) {

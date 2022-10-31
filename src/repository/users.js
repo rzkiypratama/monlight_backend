@@ -30,7 +30,7 @@ const getUser = () => {
 
 const postUser = (body, file) => {
   return new Promise((resolve, reject) => {
-    const query = `insert into profile (username, display_name, gender, birthday, phone, address, image)
+    const query = `insert into profile (username, display_name, gender, birthday, phone, address, images)
         values ($1,$2,$3,$4,$5,$6,$7)`;
     const {
       username, display_name, gender, birthday, phone, address
