@@ -23,7 +23,7 @@ postgreDb
 
     server.get("/", (req, res) => {
       res.json({
-        msg: "Semangat brooow",
+        msg: "Semangat broo",
       });
     });
     
