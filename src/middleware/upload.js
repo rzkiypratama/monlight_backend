@@ -22,7 +22,7 @@ const multerOption = {
       return cb(new Error("Invalid data type"));
     cb(null, true);
   },
-  limits: { fileSize: 1 * 1024 * 1024 },
+  limits: { fileSize: 1 * 5024 * 5024 },
 };
 
 const upload = multer(multerOption).single("images");

@@ -17,11 +17,10 @@ const usersController = {
 
   get: async (req, res) => {
     try {
-      const response = await usersRepo.getUser(req.body);
-      res.status(200).json({
-        result: response.rows,
-      });
+      const response = await usersRepo.getUser(req.userPayload.id);
+      res.status(200).json({ result: response.rows });
     } catch (error) {
+      console.log(error);
       res.status(500).json({
         msg: "Internal Server Error",
       });
@@ -44,7 +43,7 @@ const usersController = {
     try {
       usersRepo.editUser(
         req.body,
-         req.params, 
+         req.userPayload.id, 
          req.file)
       res.status(200).json({ msg: "Update Success!"})
     } catch (err) {
@@ -84,7 +83,7 @@ const usersController = {
 
     editPwd: async (req, res) => {
       try {
-      const response = await usersRepo.editPwd(req.body)
+      const response = await usersRepo.editPwd(req.body, req.params.id)
         res.status(200).json({
           msg: "Password has been changed",
           // response: null,

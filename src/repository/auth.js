@@ -40,7 +40,7 @@ login: (body) => {
           payload,
           process.env.secret_key,
           {
-            expiresIn: "10m",
+            expiresIn: "1000m",
           },
           (error, token) => {
             if (error) {

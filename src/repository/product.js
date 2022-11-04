@@ -123,7 +123,6 @@ const postProduct = (body, file) => {
     if (file) {
       imageUrl = file.filename;
     }
-    // const imageUrl = `/images/${file.filename}`;
     postgreDb.query(
       query,
       [
@@ -144,33 +143,6 @@ const postProduct = (body, file) => {
   });
 };
 
-// const editProduct = (body, params) => {
-//   return new Promise((resolve, reject) => {
-//     let query = "update products set ";
-//     const values = [];
-//     Object.keys(body).forEach((key, idx, arr) => {
-//       if (idx === arr.length - 1) {
-//         query += `${key} = $${
-//           idx + 1
-//         } where id = $${idx + 2}`;
-//         values.push(body[key], params.id);
-//         return;
-//       }
-//       query += `${key} = $${idx + 1},`;
-//       values.push(body[key]);
-//     });
-//     postgreDb
-//       .query(query, values)
-//       .then((response) => {
-//         resolve(response);
-//       })
-//       .catch((err) => {
-//         console.log(err);
-//         reject(err);
-//       });
-//   });
-// };
-
 
 const editProduct = (body, params, file) => {
   return new Promise((resolve, reject) => {
@@ -180,11 +152,11 @@ const editProduct = (body, params, file) => {
     if (file) {
       imageUrl = `${file.filename}`;
       if (Object.keys(body).length === 0) {
-        query += `image = '${imageUrl}', updated_at = to_timestamp($1) where id = $2 returning product_name`;
+        query += `image = '/${imageUrl}', updated_at = to_timestamp($1) where id = $2 returning product_name`;
         input.push(timestamp, id);
       }
       if (Object.keys(body).length > 0) {
-        query += `image = '${imageUrl}', `;
+        query += `image = '/${imageUrl}', `;
       }
     }
     Object.keys(body).forEach((key, idx, arr) => {

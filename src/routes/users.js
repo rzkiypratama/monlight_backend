@@ -6,7 +6,6 @@ const isLogin = require("../middleware/isLogin")
 
 const upload = require("../middleware/upload")
 
-
 const { get, post, patch, clear, reg, editPwd, allGetUser} = require("../controller/users")
 
 //register
@@ -22,7 +21,7 @@ usersRouter.get("/regdata", isLogin(),allGetUser);
 
 usersRouter.post("/", isLogin(), upload, post);
 
-usersRouter.patch("/:id", upload, patch);
+usersRouter.patch("/profile", isLogin(), upload, patch);
 
 usersRouter.delete("/:id", clear);
 

@@ -15,14 +15,12 @@ const allRegUser = () => {
   });
 };
 
-const getUser = () => {
+const getUser = (id) => {
   return new Promise((resolve, reject) => {
-    const query = "select * from profile";
-    postgreDb.query(query, (err, result) => {
-      if (err) {
-        console.log(err);
-        return reject(err);
-      }
+    const query =
+      "select p.*, u.email from profile p join users u on u.id = p.user_id where p.user_id =$1";
+    postgreDb.query(query, [id], (error, result) => {
+      if (error) return reject(error);
       return resolve(result);
     });
   });
@@ -30,7 +28,7 @@ const getUser = () => {
 
 const postUser = (body, file) => {
   return new Promise((resolve, reject) => {
-    const query = `insert into profile (username, display_name, gender, birthday, phone, address, images)
+    const query = `insert into profile (username, display_name, gender, birthday, phone, address, image)
         values ($1,$2,$3,$4,$5,$6,$7)`;
     const {
       username, display_name, gender, birthday, phone, address
@@ -55,40 +53,88 @@ const postUser = (body, file) => {
   });
 };
 
-const editUser = (body, params, file) => {
+// const editUser = (body, id, file) => {
+//   return new Promise((resolve, reject) => {
+//     const timeStamp = Date.now() / 1000;
+//     const values = [];
+//     let query = "update profile set ";
+//     if (file) {
+//       if (Object.keys(body).length === 0) {
+//         const imageUrl = `/image/${file.filename}`;
+//         query += `image = '${imageUrl}' update_at = to_timestamp($1) where user_id = $2 returning display_name`;
+//         values.push(timeStamp, id)
+//       }
+//       if (Object.keys(body).length > 0) {
+//         const imageUrl = `/image/${file.filename}`;
+//         query += `image = '${imageUrl}',`;
+//     }
+//     }
+//     Object.keys(body).forEach((key, idx, arr) => {
+//       if (index === array.length - 1) {
+//         query += `${key} = $${index + 1}, update_at = to_timestamp($${
+//           index + 2
+//         }) where user_id = $${index + 3} returning display_name`;
+//         values.push(body[key], timeStamp, id);
+//         return;
+//       }
+//       query += `${key} = $${index + 1}, `;
+//       values.push(body[key]);
+//     });
+//     postgreDb
+//       .query(query, values)
+//       .then((response) => {
+//         resolve(response);
+//       })
+//       .catch((err) => {
+//         console.log(err);
+//         reject(err);
+//       });
+//   });
+// };
+
+const editUser = (body, id, file) => {
   return new Promise((resolve, reject) => {
-    let query = "update profile set ";
+    const timeStamp = Date.now() / 1000;
     const values = [];
+    let query = "update profile set ";
+    let imageUrl = null;
     if (file) {
+      imageUrl = file.filename;
       if (Object.keys(body).length === 0) {
-        const imageUrl = `/image/${file.filename}`;
-        query += `image = '${imageUrl}' where user_id = $1 returning username`;
-        values.push(params.id)
+        query += `image = '/${imageUrl}', update_at = to_timestamp($1) where user_id = $2 returning display_name`;
+        values.push(timeStamp, id);
       }
       if (Object.keys(body).length > 0) {
-        const imageUrl = `/image/${file.filename}`;
-        query += `image = '${imageUrl}',`;
+        query += `image = '/${imageUrl}', `;
+      }
     }
-    }
-    Object.keys(body).forEach((key, idx, arr) => {
-      if (idx === arr.length - 1) {
-        query += `${key} = $${idx + 1
-          } where user_id = $${idx + 2}`;
-        values.push(body[key], params.id);
+    Object.keys(body).forEach((key, index, array) => {
+      if (index === array.length - 1) {
+        query += `${key} = $${index + 1}, update_at = to_timestamp($${
+          index + 2
+        }) where user_id = $${index + 3} returning display_name`;
+        values.push(body[key], timeStamp, id);
         return;
       }
-      query += `${key} = $${idx + 1},`;
+      query += `${key} = $${index + 1}, `;
       values.push(body[key]);
     });
-    postgreDb
-      .query(query, values)
-      .then((response) => {
-        resolve(response);
-      })
-      .catch((err) => {
-        console.log(err);
-        reject(err);
+    console.log(query);
+
+    postgreDb.query(query, values, (error, result) => {
+      if (error) {
+        console.log(error);
+        return reject({ status: 500, msg: "Internal Server Error" });
+      }
+      let data = {};
+      if (file) data = { Image: imageUrl, ...result.rows[0] };
+      data = { Image: imageUrl, ...result.rows[0] };
+      return resolve({
+        status: 200,
+        msg: `${result.rows[0].display_name}, your profile successfully updated`,
+        data,
       });
+    });
   });
 };
 
