@@ -1,4 +1,3 @@
-
 const jwt = require("jsonwebtoken");
 const postgreDb = require("../config/postgres");
 const isLogin = () => {

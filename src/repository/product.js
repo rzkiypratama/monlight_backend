@@ -9,7 +9,7 @@ const getProduct = (queryParams) => {
       "select count(*) as count from products p full outer join categories c on c.id = p.category_id left join transactions t on t.product_id = p.id ";
 
     let checkWhere = true;
-    let link = "http://localhost:8181/api/monlight-project/products/get?";
+    let link = "http://localhost:8181/api/monlight-project/products/get";
 
     if (search) {
       link += `search${search}&`;
