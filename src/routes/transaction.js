@@ -1,10 +1,13 @@
 const express = require("express");
-
 const transactionRouter = express.Router();
+const {get, getAll, post, patch, clear} = require("../controller/transactions")
+const isLogin = require('../middleware/isLogin')
+const allowedRoles = require('../middleware/allowedRole')
 
-const {get, post, patch, clear} = require("../controller/transactions")
 
 transactionRouter.get("/", get);
+
+transactionRouter.get("/", isLogin(), allowedRoles("User", "Admin"), getAll)
 
 transactionRouter.post("/", post);
 

@@ -1,5 +1,24 @@
 const postgreDb = require("../config/postgres");
 
+const getProductById = (id) => {
+  return new Promise((resolve, reject) => {
+    const query =
+      "select p.product_name, p.price, p.image, c.category_name, p.description, count(t.qty) as sold from products p join categories c on c.id = p.category_id left join transactions t on t.product_id = p.id where p.id = $1 group by product_name, price , image, c.category_name , description";
+    postgreDb.query(query, [id], (error, result) => {
+      if (error) {
+        console.log(error);
+        return reject(error);
+      }
+      if (result.rows === 0) return reject(error);
+      return resolve({
+        status: 200,
+        msg: "Detail Product",
+        data: result.rows[0],
+      });
+    });
+  });
+};
+
 const getProduct = (queryParams) => {
   return new Promise((resolve, reject) => {
     const { search, categories, sort, limit, page } = queryParams;
@@ -49,13 +68,13 @@ const getProduct = (queryParams) => {
         query += "order by p.created_at desc ";
         link += "sort=newest&";
       }
-      if (sort.toLowerCase() === "low") {
+      if (sort.toLowerCase() === "murah") {
         query += "order by p.price asc ";
-        link += "sort=low&";
+        link += "sort=murah&";
       }
-      if (sort.toLowerCase() === "high") {
+      if (sort.toLowerCase() === "mahal") {
         query += "order by p.price desc ";
-        link += "sort=high&";
+        link += "sort=mahal&";
       }
     }
     query += "limit $1 offset $2";
@@ -259,6 +278,7 @@ const sortsProduct = (queryParams) => {
 };
 
 const usersRepo = {
+  getProductById,
   getProduct,
   postProduct,
   editProduct,

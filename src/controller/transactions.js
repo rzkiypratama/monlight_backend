@@ -14,6 +14,19 @@ const transactionController = {
     }
   },
 
+  getAll: async (req, res) => {
+    try {
+      const response = await transactionsRepo.getAllTransactions(
+        req.userPayload.id,
+        req.query
+      );
+      return resHelper.success(res, response.status, response);
+    } catch (error) {
+      console.log(error);
+      return resHelper.error(res, error.status, error);
+    }
+  },
+
   post: async (req, res) => {
     try {
     const result = await transactionsRepo.postTransaction(req.body)

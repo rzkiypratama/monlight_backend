@@ -15,6 +15,15 @@ const productController = {
     }
   },
 
+  getById: async (req, res) => {
+    try {
+      const response = await productRepo.getProductById(req.params.id);
+      return res.status(200).json({ result: response });
+    } catch (error) {
+      return res.status(500).json({ msg: "Internal Server Error" });
+    }
+  },
+
   post: async (req, res) => {
     try {
       const result =
