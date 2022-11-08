@@ -14,16 +14,28 @@ const promosController = {
     }
   },
 
+  // post: async (req, res) => {
+  //   try {
+  //     console.log(req.body)
+  //   const result = await promosRepo.postPromo(req.body)
+  //         res.status(201).json({
+  //           msg: "Create New promo Success!",
+  //           result: result.rows.body,
+  //         });
+  //   } catch (err) {
+  //     res.status(500).json({ msg: "Internal Server Error" });
+  //   }
+  // },
+
   post: async (req, res) => {
     try {
-      console.log(req.body)
-    const result = await promosRepo.postPromo(req.body)
-          res.status(201).json({
-            msg: "Create New promo Success!",
-            result: result.rows.body,
-          });
-    } catch (err) {
-      res.status(500).json({ msg: "Internal Server Error" });
+      const response = await promosRepo.postPromo(req.body, req.file);
+      return res.status(201).json({
+        msg: `Promo ${req.body.code.toUpperCase()} Added Successfully`,
+      });
+    } catch (error) {
+      console.log(error);
+      return res.status(500).json({ msg: "Internal Server Error" });
     }
   },
 

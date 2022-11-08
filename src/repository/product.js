@@ -23,7 +23,7 @@ const getProduct = (queryParams) => {
   return new Promise((resolve, reject) => {
     const { search, categories, sort, limit, page } = queryParams;
     let query =
-      "select p.product_name, p.price, p.image, c.category_name, p.description from products p full outer join categories c on c.id = p.category_id left join transactions t on t.product_id = p.id ";
+      "select p.id, p.product_name, p.price, p.image, c.category_name, p.description from products p full outer join categories c on c.id = p.category_id left join transactions t on t.product_id = p.id ";
     let countQuery =
       "select count(*) as count from products p full outer join categories c on c.id = p.category_id left join transactions t on t.product_id = p.id ";
 
