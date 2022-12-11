@@ -19,16 +19,26 @@ const getProductById = (id) => {
   });
 };
 
+
 const getProduct = (queryParams) => {
   return new Promise((resolve, reject) => {
     const { search, categories, sort, limit, page } = queryParams;
     let query =
-      "select p.id, p.product_name, p.price, p.image, c.category_name, p.description from products p full outer join categories c on c.id = p.category_id left join transactions t on t.product_id = p.id ";
+      "select p.id, p.product_name, p.price, p.image, c.category_name, p.description from products p join categories c on c.id = p.category_id ";
     let countQuery =
-      "select count(*) as count from products p full outer join categories c on c.id = p.category_id left join transactions t on t.product_id = p.id ";
+      "select count(p.id) as count from products p join categories c on c.id = p.category_id ";
 
     let checkWhere = true;
-    let link = "http://localhost:8181/api/monlight-project/products/get";
+    let link = "http://localhost:8181/api/monlight-project/products/get?";
+
+    if (sort) {
+      if (sort.toLowerCase() === "popular") {
+        query =
+          "select p.id, p.product_name, p.price, p.image, c.category_name, p.description from products p join categories c on c.id = p.category_id left join transactions t on t.product_id = p.id ";
+        countQuery =
+          "select count(p.id) as count from products p join categories c on c.id = p.category_id  left join transactions t on t.product_id = p.id ";
+      }
+    }
 
     if (search) {
       link += `search${search}&`;
@@ -56,10 +66,7 @@ const getProduct = (queryParams) => {
 
     if (sort) {
       query += "group by p.id, c.category_name ";
-      if (sort.toLowerCase() === "popular") {
-        query += "order by count(t.qty) desc ";
-        link += "sort=popular&";
-      }
+      countQuery += "group by p.id";
       if (sort.toLowerCase() === "oldest") {
         query += "order by p.created_at asc ";
         link += "sort=oldest&";
@@ -68,19 +75,19 @@ const getProduct = (queryParams) => {
         query += "order by p.created_at desc ";
         link += "sort=newest&";
       }
-      if (sort.toLowerCase() === "murah") {
+      if (sort.toLowerCase() === "cheapest") {
         query += "order by p.price asc ";
-        link += "sort=murah&";
+        link += "sort=cheapest&";
       }
-      if (sort.toLowerCase() === "mahal") {
+      if (sort.toLowerCase() === "priciest") {
         query += "order by p.price desc ";
-        link += "sort=mahal&";
+        link += "sort=priciest&";
       }
     }
     query += "limit $1 offset $2";
     console.log(query);
     console.log(link);
-    const sqlLimit = limit ? limit : 10;
+    const sqlLimit = limit ? limit : 8;
     const sqlOffset =
       !page || page === "1" ? 0 : (parseInt(page) - 1) * parseInt(sqlLimit);
 
@@ -89,7 +96,11 @@ const getProduct = (queryParams) => {
     postgreDb.query(countQuery, (err, result) => {
       if (err) return reject(err);
       // return resolve(result.rows);
-      const totalData = result.rows[0].count;
+      const totalData =
+        sort && sort.toLowerCase() === "popular"
+          ? result.rows.length
+          : result.rows[0].count;
+
       const currentPage = page ? parseInt(page) : 1;
       const totalPage =
         parseInt(sqlLimit) > totalData
@@ -110,7 +121,7 @@ const getProduct = (queryParams) => {
         page: currentPage,
         totalPage,
         limit: parseInt(sqlLimit),
-        totalData,
+        totalData: parseInt(totalData),
         prev,
         next,
       };
@@ -131,6 +142,7 @@ const getProduct = (queryParams) => {
     });
   });
 };
+
 
 
 const postProduct = (body, file) => {
@@ -163,39 +175,82 @@ const postProduct = (body, file) => {
 };
 
 
-const editProduct = (body, params, file) => {
+// const editProduct = (body, params, file) => {
+//   return new Promise((resolve, reject) => {
+//     let query = "update products set ";
+//     let imageUrl = null;
+//     const values = [];
+//     if (file) {
+//       imageUrl = `${file.filename}`;
+//       if (Object.keys(body).length === 0) {
+//         query += `image = '/${imageUrl}', updated_at = now() where id = $1 returning product_name`;
+//         values.push(id);
+//       }
+//       if (Object.keys(body).length > 0) {
+//         query += `image = '/${imageUrl}', `;
+//       }
+//     }
+//     Object.keys(body).forEach((key, idx, arr) => {
+//             if (idx === arr.length - 1) {
+//               query += `${key} = $${
+//                 idx + 1
+//               } where id = $${idx + 2}`;
+//               values.push(body[key], params.id);
+//               return;
+//             }
+//             query += `${key} = $${idx + 1},`;
+//             values.push(body[key]);
+//           });
+//     postgreDb
+//       .query(query, values)
+//       .then((response) => {
+//         resolve(response);
+//       })
+//       .catch((err) => {
+//         console.log(err)
+//         return reject(err);
+        
+//       });
+//   });
+// };
+
+const editProduct = (body, id, file) => {
   return new Promise((resolve, reject) => {
+    const timestamp = Date.now() / 1000;
     let query = "update products set ";
     let imageUrl = null;
-    const values = [];
+    const input = [];
     if (file) {
       imageUrl = `${file.filename}`;
       if (Object.keys(body).length === 0) {
-        query += `image = '/${imageUrl}', updated_at = to_timestamp($1) where id = $2 returning product_name`;
-        input.push(timestamp, id);
+        query += `image = '${imageUrl}', update_at = to_timestamp($1) where id = $2 returning product_name`;
+        input.push(timestamp, id.id);
       }
       if (Object.keys(body).length > 0) {
-        query += `image = '/${imageUrl}', `;
+        query += `image = '${imageUrl}', `;
       }
     }
-    Object.keys(body).forEach((key, idx, arr) => {
-            if (idx === arr.length - 1) {
-              query += `${key} = $${
-                idx + 1
-              } where id = $${idx + 2}`;
-              values.push(body[key], params.id);
-              return;
-            }
-            query += `${key} = $${idx + 1},`;
-            values.push(body[key]);
-          });
+
+    Object.keys(body).forEach((element, index, array) => {
+      if (index === array.length - 1) {
+        query += `${element} = $${index + 1} where id = $${
+          index + 2
+        } returning product_name`;
+        input.push(body[element], id.id);
+        return;
+      }
+      query += `${element} = $${index + 1}, `;
+      input.push(body[element]);
+    });
+
     postgreDb
-      .query(query, values)
+      .query(query, input)
       .then((response) => {
         resolve(response);
       })
-      .catch((err) => {
-        reject(err);
+      .catch((error) => {
+        console.log(error);
+        reject(error);
       });
   });
 };

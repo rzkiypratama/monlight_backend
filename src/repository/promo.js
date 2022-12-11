@@ -13,6 +13,90 @@ const getPromo = () => {
   });
 };
 
+const getPromoById = (id) => {
+  return new Promise((resolve, reject) => {
+    const query = "select * from promos where id = $1";
+    postgreDb.query(query, [id], (error, result) => {
+      if (error) {
+        console.log(error);
+        return reject({ status: 500, msg: "Internal Server Error" });
+      }
+      if (result.rows.length === 0)
+        return reject({ status: 404, msg: "Promo Not Found" });
+
+      return resolve({
+        status: 200,
+        msg: "Detail Promo",
+        data: { ...result.rows[0] },
+      });
+    });
+  });
+};
+
+const getPromos = (params) => {
+  return new Promise((resolve, reject) => {
+    let link = "/api/promos?";
+    const { code, page, limit } = params;
+    const countQuery =
+      "select count(id) as count from promos where lower(code) like lower($1)";
+    const query =
+      "select * from promos where lower(code) like lower($1) order by created_at desc limit $2 offset $3 ";
+    const sqlLimit = !limit ? 4 : parseInt(limit);
+    const sqlOffset = !page || page === "1" ? 0 : parseInt(page - 1) * limit;
+    let promoCode = "%%";
+    if (code) {
+      link += `code=${code}`;
+      promoCode = `%${code}%`;
+    }
+    db.query(countQuery, [promoCode], (error, result) => {
+      if (error) {
+        console.log(error);
+        return reject({
+          status: 500,
+          msg: "Internal server error",
+        });
+      }
+      const totalData = parseInt(result.rows[0].count);
+      const currentPage = page ? parseInt(page) : 1;
+      const totalPage =
+        sqlLimit > totalData ? 1 : Math.ceil(totalData / limit);
+      const prev =
+        currentPage === 1
+          ? null
+          : link + `page=${currentPage - 1}&limit=${sqlLimit}`;
+      const next =
+        currentPage === totalPage
+          ? null
+          : link + `page=${currentPage + 1}&limit=${sqlLimit}`;
+      const meta = {
+        page: currentPage,
+        totalPage,
+        limit: sqlLimit,
+        totalData,
+        prev,
+        next,
+      };
+      db.query(query, [promoCode, sqlLimit, sqlOffset], (error, result) => {
+        if (error) {
+          console.log(error);
+          return reject({
+            status: 500,
+            msg: "Internal Server Error",
+          });
+        }
+        if (result.rows.length === 0)
+          return reject({ status: 404, msg: "Data not Found" });
+        return resolve({
+          status: 200,
+          msg: "List Promos",
+          data: result.rows,
+          meta,
+        });
+      });
+    });
+  });
+};
+
 const postPromo = (body, file) => {
   return new Promise((resolve, reject) => {
     const query =
@@ -53,28 +137,79 @@ const postPromo = (body, file) => {
   });
 };
 
-const editPromo = (body, params) => {
+// const editPromo = (body, params) => {
+//   return new Promise((resolve, reject) => {
+//     const values = [];
+//     const timestamp = Date.now() / 1000;
+//     let query = "update promos set ";
+//     Object.keys(body).forEach((key, index, array) => {
+//       if (index === array.length - 1) {
+//         query += `${key} = $${index + 1}, update_at = to_timestamp($${
+//           index + 2
+//         })  where id = $${index + 3}`;
+//         values.push(body[key], timestamp, params.id);
+//         return;
+//       }
+//       query += `${key} = $${index + 1}, `;
+//       values.push(body[key]);
+//     });
+
+//     postgreDb.query(query, values, (error, result) => {
+//       if (error) return reject(error);
+//       return resolve(result);
+//     });
+//   });
+// };
+
+const editPromo = (body, params, file) => {
   return new Promise((resolve, reject) => {
-    let query = "update promos set ";
     const values = [];
-    Object.keys(body).forEach((key, idx, arr) => {
-      if (idx === arr.length - 1) {
-        query += `${key} = $${idx + 1} where id = $${idx + 2}`;
-        values.push(body[key], params.id);
+    const timestamp = Date.now() / 1000;
+    let imageUrl = null;
+    let query = "update promos set ";
+    if (file) {
+      console.log(file)
+      imageUrl = `${file.filename}`;
+      if (Object.keys(body).length === 0) {
+        query += `image = '/${imageUrl}', update_at = to_timestamp($1) where id = $2 returning code`;
+        values.push(timestamp, params.id);
+      }
+      if (Object.keys(body).length > 0) {
+        query += `image = '/${imageUrl}', `;
+      }
+    }
+
+    Object.keys(body).forEach((key, index, array) => {
+      if (index === array.length - 1) {
+        query += `${key} = $${index + 1}, update_at = to_timestamp($${
+          index + 2
+        })  where id = $${index + 3} returning code`;
+        values.push(body[key], timestamp, params.id);
         return;
       }
-      query += `${key} = $${idx + 1},`;
+      query += `${key} = $${index + 1}, `;
       values.push(body[key]);
     });
-    postgreDb
-      .query(query, values)
-      .then((response) => {
-        resolve(response);
-      })
-      .catch((err) => {
-        console.log(err);
-        reject(err);
+
+    postgreDb.query(query, values, (error, result) => {
+      if (error) {
+        console.log(error);
+        return reject({
+          status: 500,
+          msg: "Internal Server Error",
+        });
+      }
+      if (result.rows.length === 0)
+        return reject({
+          status: 404,
+          msg: "Update promo failed, promo not found",
+        });
+      return resolve({
+        status: 201,
+        msg: `promo ${result.rows[0].code} updated sucessfully`,
+        data: { id: params.id, ...body },
       });
+    });
   });
 };
 
@@ -110,7 +245,8 @@ const promosRepo = {
   postPromo,
   editPromo,
   clearPromo,
-  searchPromo
+  searchPromo,
+  getPromoById
 };
 
 module.exports = promosRepo;

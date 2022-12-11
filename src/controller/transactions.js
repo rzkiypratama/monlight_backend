@@ -1,4 +1,5 @@
 const transactionsRepo = require("../repository/transaction")
+const resHelper = require("../helper/sendResponse")
 
 const transactionController = {
   get: async (req, res) => {
@@ -16,7 +17,7 @@ const transactionController = {
 
   getAll: async (req, res) => {
     try {
-      const response = await transactionsRepo.getAllTransactions(
+      const response = await transactionsRepo.getTransaction(
         req.userPayload.id,
         req.query
       );
@@ -28,16 +29,17 @@ const transactionController = {
   },
 
   post: async (req, res) => {
-    try {
-    const result = await transactionsRepo.postTransaction(req.body)
-          res.status(201).json({
-            msg: "Create New Transaction Success!",
-            result: result.rows,
-          });
-    } catch (err) {
-      res.status(500).json({ msg: "Internal Server Error" });
-    }
-  },
+  try {
+    const response = await transactionsRepo.postTransaction(
+      req.body,
+      req.userPayload.id
+    );
+    res.status(201).json({ msg: "Transaction Success" });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ msg: "Internal Server Error" });
+  }
+},
 
   patch: async (req, res) => {
     try {

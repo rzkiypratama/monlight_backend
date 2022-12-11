@@ -1,4 +1,6 @@
 const promosRepo = require("../repository/promo")
+const resHelper = require("../helper/sendResponse")
+
 
 const promosController = {
   get: async (req, res) => {
@@ -11,6 +13,15 @@ const promosController = {
       res.status(500).json({
         msg: "Internal Server Error",
       });
+    }
+  },
+
+  getPromoById: async (req, res) => {
+    try {
+      const response = await promosRepo.getPromoById(req.params.id);
+      resHelper.success(res, response.status, response);
+    } catch (error) {
+      return resHelper.error(res, error.status, error);
     }
   },
 
@@ -41,10 +52,15 @@ const promosController = {
 
   patch: async (req, res) => {
     try {
-      promosRepo.editpromo(req.body, req.params)
-      res.status(200).json({ msg: "Update Success!"})
-    } catch (err) {
-      res.status(500).json({ msg: "Internal Server Error" });
+      const response = await promosRepo.editPromo(
+        req.body,
+        req.params,
+        req.file
+      );
+      return resHelper.success(res, response.status, response);
+    } catch (error) {
+      console.log(error);
+      resHelper.error(res, error.status, error);
     }
   },
 

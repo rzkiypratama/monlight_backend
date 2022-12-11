@@ -14,27 +14,28 @@ const postgreDb = require("../config/postgres");
 //     });
 // };
 
-const getTransaction = (id) => {
-  return new Promise((resolve, reject) => {
-    const query =
-      "select t.create_at, p2.display_name, p.product_name, s.size , p.price, t.qty, pr.code, d.method, py.method, t.subtotal, st.status from transactions t join profile p2 on p2.user_id = t.user_id join products p on p.id = t.product_id join sizes s on s.id = t.size_id join promos pr on pr.id = t.promo_id join delivery d on d.id = t.delivery_id join payment py on py.id = t.payment_id join status st on st.id = t.status_id where t.id = $1";
-    postgreDb.query(query, [id], (error, result) => {
-      if (error) {
-        console.log(error);
-        return reject({ status: 500, msg: "Internal Server Error" });
-      }
-      if (result.rows.length === 0)
-        return reject({ status: 404, msg: "Transaction cannot be found" });
-      return resolve({
-        status: 200,
-        msg: "Transaction Details",
-        data: { ...result.rows[0] },
-      });
-    });
-  });
-};
+// const getTransaction = (id) => {
+//   return new Promise((resolve, reject) => {
+//     const query =
+//       "select t.create_at, p2.display_name, p.product_name, s.size , p.price, t.qty, pr.code, d.method, py.method, t.subtotal, st.status_name from transactions t join profile p2 on p2.user_id = t.user_id join products p on p.id = t.product_id join sizes s on s.id = t.size_id join promos pr on pr.id = t.promo_id join delivery d on d.id = t.delivery_id join payment py on py.id = t.payment_id join status st on st.id = t.status_id where t.user_id = $1";
+//     postgreDb.query(query, [id], (error, result) => {
+//       if (error) {
+//         console.log(error);
+//         return reject({ status: 500, msg: "Internal Server Error" });
+//       }
+//       if (result.rows.length === 0)
+//         return reject({ status: 404, msg: "Transaction cannot be found" });
+//       return resolve({
+//         status: 200,
+//         msg: "Transaction Details",
+//         data: { ...result.rows[0] },
+//       });
+//     });
+//   });
+// };
 
-const getAllTransaction = (id, queryParams) => {
+
+const getTransaction = (id, queryParams) => {
   return new Promise((resolve, reject) => {
     const { page, limit } = queryParams;
     let link = "http://localhost:8181/api/monlight-project/transactions";
@@ -42,7 +43,7 @@ const getAllTransaction = (id, queryParams) => {
       "select count(id) as count from transactions where user_id = $1";
 
     const query =
-      "select t.create_at, p2.display_name, p.product_name, p.image, s.size , p.price,t.qty, pr.code, d.method, py.method, t.subtotal, st.status from transactions t join profile p2  on p2.user_id = t.user_id join products p on p.id = t.product_id join sizes s on s.id = t.size_id join promos pr on pr.id = t.promo_id join delivery d on d.id = t.delivery_id join payments py on py.id = t.payment_id join status st on st.id = t.status_id where t.user_id = $1 order by create_at desc limit $2 offset $3";
+      "select t.create_at, p2.display_name, p.product_name, p.image, s.size , p.price,t.qty, pr.code, d.method, py.method, t.subtotal, st.status_name from transactions t join profile p2  on p2.user_id = t.user_id join products p on p.id = t.product_id join sizes s on s.id = t.size_id join promos pr on pr.id = t.promo_id join delivery d on d.id = t.delivery_id join payment py on py.id = t.payment_id join status st on st.id = t.status_id where t.user_id = $1 order by create_at desc limit $2 offset $3";
 
     postgreDb.query(countQuery, [id], (error, result) => {
       if (error) {
@@ -53,7 +54,7 @@ const getAllTransaction = (id, queryParams) => {
         return reject({ status: 404, msg: "Data not found" });
 
       const totalData = parseInt(result.rows[0].count);
-      const sqlLimit = !limit ? 3 : parseInt(limit);
+      const sqlLimit = !limit ? 6 : parseInt(limit);
       const sqlOffset = !page || page === "1" ? 0 : parseInt(page - 1) * limit;
       const currentPage = page ? parseInt(page) : 1;
       const totalPage =
@@ -97,27 +98,42 @@ const getAllTransaction = (id, queryParams) => {
   });
 };
 
-const postTransaction = (body) => {
-    return new Promise((resolve, reject) => {
-      const query = `insert into transactions (user_id, tax, payment_id, delivery_id, promo_id, product_id, qty, size_id, subtotal, status_id)
-      values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)`;
+const postTransaction = (body, id) => {
+  return new Promise((resolve, reject) => {
+    const query =
+      "insert into transactions (user_id, product_id, size_id, promo_id, payment_id, delivery_id, qty, subtotal, status_id, create_at) values($1, $2, $3, $4, $5, $6, $7, $8, $9, to_timestamp($10))";
     const {
-      user_id, tax, payment_id, delivery_id, promo_id, product_id, qty, size_id, subtotal, status_id,
+      product_id,
+      size_id,
+      promo_id,
+      payment_id,
+      delivery_id,
+      qty,
+      subtotal,
+      status_id,
     } = body;
-    postgreDb.query(
-      query,
-      [
-        user_id, tax, payment_id, delivery_id, promo_id, product_id, qty, size_id, subtotal, status_id,
-      ],
-          (err, result) => {
-            console.log(err);
-            if (err) {
-                return reject(err);
-            };
-           resolve(result)
-          }
-        );
+    const timeStamp = Date.now() / 1000;
+    const user_id = id;
+    const values = [
+      user_id,
+      product_id,
+      size_id,
+      promo_id,
+      payment_id,
+      delivery_id,
+      qty,
+      subtotal,
+      status_id,
+      timeStamp,
+    ];
+
+    // return console.log(values);
+
+    postgreDb.query(query, values, (error, result) => {
+      if (error) return reject(error);
+      return resolve(result);
     });
+  });
 };
 
 const editTransaction = (body, params) => {
@@ -161,7 +177,7 @@ const clearTransaction = (params) => {
 
 
 const transactionsRepo = {
-    getTransaction, postTransaction, editTransaction, clearTransaction, getAllTransaction
+    getTransaction, postTransaction, editTransaction, clearTransaction
 }
 
 module.exports = transactionsRepo
