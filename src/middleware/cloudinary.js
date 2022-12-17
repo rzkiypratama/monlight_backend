@@ -8,22 +8,22 @@ const uploader = async (req, res, next) => {
   const parser = new DatauriParser();
   const buffer = file.buffer;
   const ext = path.extname(file.originalname.toString).toString();
-  const datauri = parser.format(ext, buffer);
-  const fileName = `${body.prefix}_${body.user_id}`;
+  const dataUri = parser.format(ext, buffer);
+  // const fileName = `${body.prefix}_${body.user_id}`;
   const cloudinaryOpt = {
-    public_id: fileName,
+    public_id: `${Math.floor(Math.random() * 10e9)}`,
     folder: 'monlight-project'
   };
 
     try {
       cloudinary.uploader.upload(
-        datauri,
+        dataUri.content,
         cloudinaryOpt
         );
       req.file = result;
       next()
-    } catch (err) {
-      res.status(err).json({msg: "internal server error"})
+    } catch (error) {
+      return res.status(415).json({ status: 415, msg: error.message });
     }
 }
 
