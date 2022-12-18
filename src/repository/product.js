@@ -87,7 +87,7 @@ const getProduct = (queryParams) => {
     query += "limit $1 offset $2";
     console.log(query);
     console.log(link);
-    const sqlLimit = limit ? limit : 8;
+    const sqlLimit = limit ? limit : 10;
     const sqlOffset =
       !page || page === "1" ? 0 : (parseInt(page) - 1) * parseInt(sqlLimit);
 
@@ -152,7 +152,7 @@ const postProduct = (body, file) => {
     const { product_name, price, category_id, description } = body;
     let imageUrl = null;
     if (file) {
-      imageUrl = `/${file.filename}`;
+      imageUrl = `/${file.url}`;
     }
     postgreDb.query(
       query,
@@ -221,7 +221,7 @@ const editProduct = (body, id, file) => {
     let imageUrl = null;
     const input = [];
     if (file) {
-      imageUrl = `${file.filename}`;
+      imageUrl = `${file.url}`;
       if (Object.keys(body).length === 0) {
         query += `image = '${imageUrl}', update_at = to_timestamp($1) where id = $2 returning product_name`;
         input.push(timestamp, id.id);

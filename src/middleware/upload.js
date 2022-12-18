@@ -2,7 +2,7 @@ const multer = require("multer");
 const path = require("path");
 // const storage = multer.diskStorage({
 //   destination: (req, file, cb) => {
-//     cb(null, "./uploads/images");
+//     cb(null, "./public/images");
 //   },
 //   filename: (req, file, cb) => {
 //     const fileName = `${file.fieldname}-${Date.now()}-${Math.round(
@@ -11,6 +11,7 @@ const path = require("path");
 //     cb(null, fileName);
 //   },
 // });
+
 const memory = multer.memoryStorage();
 const multerOption = {
   memory,
@@ -23,7 +24,7 @@ const multerOption = {
   limits: { fileSize: 1 * 1024 * 1024 },
 };
 
-const upload = multer(multerOption).single("images");
+const upload = multer(multerOption).single("image");
 const multerHandler = (req, res, next) => {
   upload(req, res, (error) => {
     if (error instanceof multer.MulterError) {
@@ -39,9 +40,5 @@ const multerHandler = (req, res, next) => {
     next();
   });
 };
-// const memorystorage = multer.memoryStorage();
-
-// const memoryUpload
-
 
 module.exports = multerHandler;

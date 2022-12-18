@@ -9,7 +9,7 @@ const authRouter = require("./auth");
 
 const mainRouter = express.Router();
 
-const upload = require("../middleware/upload");
+const {diskUpload, memoryUpload} = require("../middleware/upload");
 
 const prefix = "/api/monlight-project";
 
@@ -18,10 +18,17 @@ mainRouter.use(`${prefix}/products`, productsRouter);
 mainRouter.use(`${prefix}/transactions`, transactionsRouter);
 mainRouter.use(`${prefix}/promos`, promosRouter);
 mainRouter.use(`${prefix}/auth`, authRouter)
-// mainRouter.post("/", upload, (req, res) => {
-//   res.json({ url: `/images/${req.file.filename}` }, uploadRouter);
-//   // res.json({file: req.file})
-// });
+
+mainRouter.post("/", diskUpload.single("images"), (req, res) => {
+  res.json({ url: `/images/${req.file.filename}` }, uploadRouter);
+  // res.json({file: req.file})
+});
+mainRouter.get("/", (req, res) => {
+  res.json({
+    msg: "Welcome",
+  });
+});
+
 
 module.exports = mainRouter;
 
