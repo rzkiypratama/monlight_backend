@@ -10,7 +10,7 @@ const uploader = async (req, res, next) => {
   const dataUri = parser.format(ext, buffer);
   const cloudinaryOpt = {
     public_id: `${Math.floor(Math.random() * 10e9)}`,
-    folders: "monlight",
+    folder: "monlight",
   };
   try {
     const result = await cloudinary.uploader.upload(

@@ -152,7 +152,7 @@ const postProduct = (body, file) => {
     const { product_name, price, category_id, description } = body;
     let imageUrl = null;
     if (file) {
-      imageUrl = `/${file.url}`;
+      imageUrl = `/${file.secure_url}`;
     }
     postgreDb.query(
       query,
