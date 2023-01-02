@@ -152,7 +152,7 @@ const postProduct = (body, file) => {
     const { product_name, price, category_id, description } = body;
     let imageUrl = null;
     if (file) {
-      imageUrl = `/${file.secure_url}`;
+      imageUrl = `/${file.filename}`;
     }
     postgreDb.query(
       query,
@@ -221,7 +221,7 @@ const editProduct = (body, id, file) => {
     let imageUrl = null;
     const input = [];
     if (file) {
-      imageUrl = `${file.url}`;
+      imageUrl = `${file.filename}`;
       if (Object.keys(body).length === 0) {
         query += `image = '${imageUrl}', update_at = to_timestamp($1) where id = $2 returning product_name`;
         input.push(timestamp, id.id);
