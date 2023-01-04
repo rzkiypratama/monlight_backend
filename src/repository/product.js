@@ -87,7 +87,7 @@ const getProduct = (queryParams) => {
     query += "limit $1 offset $2";
     console.log(query);
     console.log(link);
-    const sqlLimit = limit ? limit : 10;
+    const sqlLimit = limit ? limit : 8;
     const sqlOffset =
       !page || page === "1" ? 0 : (parseInt(page) - 1) * parseInt(sqlLimit);
 
