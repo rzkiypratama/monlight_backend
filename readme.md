@@ -34,17 +34,6 @@ Install dependency packages by run the following code inside project folder:
 npm install / npm i
 ```
 
-## Application Structure
-
-- `index.js` - The entry point to our application. This file defines our express server and connects it to posgreSQL
-- `config/` - This folder contains configuration for passport as well as a central location for configuration/environment variables.
-- `routes/` - This folder contains the route definitions for our API.
-- `models/` - This folder contains the schema definitions for our sql models.
-- `handler/` - This folder contains the schema definitions for unctions that separate out the code to route requests from the code that actually processes requests.
-- `middleware/` - This folder contains the schema definitions for middleware.
-- `helper/` - This folder contains helper functions to make our code much easier to read
-- `public/` - This folder contains uploaded data to our API
-
 ## Documentation
 
 [Documentation](https://github.com/rzkiyprtm/monlight_backend.git)
@@ -74,7 +63,10 @@ npm install / npm i
   - Update
   - Delete
 
-## API Reference Example
+## Related Project
+* [`Monlight Cafe & Bar Frontend`](https://github.com/rzkiyprtm/react-monlight-app)
+
+
 
 ```http
   GET, POST /products
